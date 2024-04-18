@@ -10,9 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "1.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vite-plugin-next-react-router": "0.7.1"
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8",
+    "vite-plugin-next-react-router": "0.7.1",
+    "zustand": "4.5.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
