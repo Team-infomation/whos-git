@@ -2,11 +2,13 @@ import { create } from "zustand";
 
 interface SearchStore {
   keyword: string;
-  searchResult: any[];
+  setKeyword: any;
+  searchResult: any;
+  setSearchResult: any;
 }
 
-export const searchStore = create((set) => ({
-  keyword: 0,
+export const searchStore = create<SearchStore>((set) => ({
+  keyword: "",
   searchResult: [],
   setKeyword: (keyword: string) => set((state: any) => ({ keyword })),
   setSearchResult: (searchResult: any[]) =>

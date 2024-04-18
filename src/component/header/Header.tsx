@@ -1,21 +1,27 @@
 // MODULE
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 // API
 import { memberSearchGET } from "../../api/github";
 // ZUSTAND
 import { searchStore } from "../../store/searchStore";
 // IMAGE
 import Logo from "/logo.png";
-const Header = () => {
-  const { keyword, setKeyword, searchResult, setSearchResult } = searchStore();
+// TYPE
+interface Props {}
+const Header: React.FC<Props> = () => {
+  const navigate = useNavigate();
+  const { keyword, setKeyword, setSearchResult } = searchStore();
   const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setKeyword(e.target.value);
   };
   const handleSearchMember = async () => {
     try {
-      const response = await memberSearchGET(keyword);
+      const response: any = await memberSearchGET(keyword);
       console.log(response);
+      setSearchResult(response.data);
+      navigate("result");
     } catch (error) {
       console.log(error);
     }
