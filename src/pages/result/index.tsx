@@ -1,7 +1,9 @@
 // MODULE
+import styled from "styled-components";
 // ZUSTAND
 // TYPE
 interface Props {}
+// STYLED
 
 import ResultItem from "../../component/resultItem";
 import { searchStore } from "../../store/searchStore";
@@ -11,7 +13,7 @@ const Result: React.FC<Props> = () => {
   const resultObject = searchResult.items;
   console.log(searchResult);
   return (
-    <>
+    <div className="con">
       검색어 {keyword}에 대한 검색결과
       <br />총<span>{totalCount}개</span>의 결과
       <ul>
@@ -27,7 +29,7 @@ const Result: React.FC<Props> = () => {
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 };
 
