@@ -43,7 +43,7 @@ const Header: React.FC<Props> = () => {
   };
   const handleSearchMember = async () => {
     try {
-      const response: any = await memberSearchGET(keyword);
+      const response: unknown | any = await memberSearchGET(keyword);
       console.log(response);
       setSearchResult(response.data);
       navigate("result");
@@ -51,6 +51,7 @@ const Header: React.FC<Props> = () => {
       console.log(error);
     }
   };
+
   return (
     <SearchBar id={`header`}>
       <div className="con">

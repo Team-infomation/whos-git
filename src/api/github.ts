@@ -20,3 +20,18 @@ export const memberSearchGET = (keyword: string) => {
       });
   });
 };
+
+export const memberInfoGET = (memberLoginId: string) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}users/${memberLoginId}`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};

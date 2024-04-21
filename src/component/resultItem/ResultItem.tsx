@@ -11,7 +11,7 @@ interface Props {
   id: number;
   type: string;
   avatar: string;
-  follower: object;
+  follower: string;
 }
 // STYLED
 const MiddleBox = styled.div`
@@ -34,9 +34,11 @@ const AvatarBox = styled.div`
 `;
 const ResultItem: React.FC<Props> = ({ login, id, type, avatar, follower }) => {
   const navigate = useNavigate();
-  console.log(follower);
   return (
-    <ResultBox className="flex cursor_p" onClick={() => navigate("/detail")}>
+    <ResultBox
+      className="flex cursor_p"
+      onClick={() => navigate("/detail", { state: { id: login } })}
+    >
       <AvatarBox>
         <img src={avatar} alt="" loading="lazy" width={80} height={80} />
       </AvatarBox>
@@ -45,7 +47,7 @@ const ResultItem: React.FC<Props> = ({ login, id, type, avatar, follower }) => {
           <LoginId login={login} />
         </div>
         <div className="flex">
-          <div>Follower : </div>
+          <div>Follower : {follower}</div>
           <div>Following : </div>
         </div>
       </MiddleBox>
