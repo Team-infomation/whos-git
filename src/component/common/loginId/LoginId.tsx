@@ -6,7 +6,6 @@ interface Props {
 }
 // STYLED
 const MemberId = styled.div`
-  margin-left: 2.5rem;
   font-size: 2.4rem;
   font-weight: 700;
 `;

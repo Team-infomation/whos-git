@@ -1,4 +1,5 @@
 // MODULE
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 // COMPONENT
 import LoginId from "../common/loginId";
@@ -13,6 +14,10 @@ interface Props {
   follower: object;
 }
 // STYLED
+const MiddleBox = styled.div`
+  flex-basis: 50%;
+  margin-left: 2.5rem;
+`;
 const ResultBox = styled.div`
   padding: 1rem;
   margin-bottom: 2rem;
@@ -20,6 +25,7 @@ const ResultBox = styled.div`
   border: 1px solid var(--light-gray);
 `;
 const AvatarBox = styled.div`
+  flex-basis: 8rem;
   width: 8rem;
   height: 8rem;
   border-radius: 50%;
@@ -27,16 +33,23 @@ const AvatarBox = styled.div`
   overflow: hidden;
 `;
 const ResultItem: React.FC<Props> = ({ login, id, type, avatar, follower }) => {
+  const navigate = useNavigate();
   console.log(follower);
   return (
-    <ResultBox className="flex cursor_p">
+    <ResultBox className="flex cursor_p" onClick={() => navigate("/detail")}>
       <AvatarBox>
         <img src={avatar} alt="" loading="lazy" width={80} height={80} />
       </AvatarBox>
-      <LoginId login={login} />
+      <MiddleBox className="flex flex_dir_c flex_jc_sb">
+        <div className="flex flex_ai_c">
+          <LoginId login={login} />
+        </div>
+        <div className="flex">
+          <div>Follower : </div>
+          <div>Following : </div>
+        </div>
+      </MiddleBox>
       <Type type={type} />
-      <div>Follower : </div>
-      <div>Following : </div>
     </ResultBox>
   );
 };
