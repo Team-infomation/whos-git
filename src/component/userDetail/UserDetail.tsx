@@ -16,9 +16,6 @@ const AvatarBox = styled.div`
   overflow: hidden;
 `;
 
-const TabMenu = () => {
-  return <></>;
-};
 const UserDetail: React.FC<Props> = ({ avatar, loginId }) => {
   return (
     <>
@@ -26,9 +23,6 @@ const UserDetail: React.FC<Props> = ({ avatar, loginId }) => {
         <img src={avatar} alt="" loading="lazy" width={120} height={120} />
       </AvatarBox>
       <LoginId login={loginId} />
-      <div>
-        <TabMenu />
-      </div>
     </>
   );
 };

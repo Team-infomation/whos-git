@@ -11,6 +11,7 @@ interface Props {}
 const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
   const [userData, setUserData] = useState<any>(null);
+  const StorageData: unknown | any = localStorage.getItem("userData");
   const getMemberInfo = async () => {
     try {
       const response: unknown | any = await memberInfoGET(state.id);
@@ -22,18 +23,25 @@ const MemberDetail: React.FC<Props> = () => {
       console.log("로딩완료");
     }
   };
+  console.log("StorageData", StorageData);
+  console.log("state", state);
   useLayoutEffect(() => {
-    if (localStorage.getItem("userData") === null) {
+    if (StorageData === null) {
       getMemberInfo();
     } else {
-      const StorageData = localStorage.getItem("userData");
       setUserData(JSON.parse(StorageData));
     }
   }, []);
   console.log(userData);
   return (
     <div className="con">
-      <UserDetail avatar={userData.avatar_url} loginId={userData.login} />
+      <UserDetail avatar={userData?.avatar_url} loginId={userData?.login} />
+      <div>
+        <ul className="flex flex_ai_c">
+          <li className="flex flex_jc_c flex_ai_c cursor_p">Repository</li>
+          <li className="flex flex_jc_c flex_ai_c cursor_p">Chart</li>
+        </ul>
+      </div>
     </div>
   );
 };

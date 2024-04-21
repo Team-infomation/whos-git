@@ -46,7 +46,7 @@ const Header: React.FC<Props> = () => {
       const response: unknown | any = await memberSearchGET(keyword);
       console.log(response);
       setSearchResult(response.data);
-      navigate("result");
+      navigate("result", { state: { searchKeyword: keyword } });
     } catch (error) {
       console.log(error);
     }
