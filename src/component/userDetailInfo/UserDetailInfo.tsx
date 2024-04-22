@@ -1,10 +1,13 @@
 // MODULE
 import styled from "styled-components";
 import LoginId from "../common/loginId";
+import README from "../README/README";
 // TYPE
 interface Props {
   avatar: string;
   loginId: string;
+  profileRepo: string;
+  bio: any;
 }
 // STYLED
 const AvatarBox = styled.div`
@@ -15,16 +18,30 @@ const AvatarBox = styled.div`
   border: 1px solid var(--light-gray);
   overflow: hidden;
 `;
-
-const UserDetail: React.FC<Props> = ({ avatar, loginId }) => {
+const BioBox = styled.div`
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--light-gray);
+`;
+const UserDetailInfo: React.FC<Props> = ({
+  avatar,
+  loginId,
+  profileRepo,
+  bio,
+}) => {
   return (
     <>
       <AvatarBox>
         <img src={avatar} alt="" loading="lazy" width={120} height={120} />
       </AvatarBox>
       <LoginId login={loginId} />
+      {profileRepo === null ? (
+        <BioBox>{bio !== null ? bio : ""}</BioBox>
+      ) : (
+        <README readme={profileRepo} />
+      )}
     </>
   );
 };
 
-export default UserDetail;
+export default UserDetailInfo;

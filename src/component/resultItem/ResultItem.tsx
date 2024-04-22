@@ -34,10 +34,14 @@ const AvatarBox = styled.div`
 `;
 const ResultItem: React.FC<Props> = ({ login, id, type, avatar, follower }) => {
   const navigate = useNavigate();
+  const handleMoveMemberDetail = () => {
+    navigate("/detail", { state: { id: login } });
+    localStorage.removeItem("userData");
+  };
   return (
     <ResultBox
       className="flex cursor_p"
-      onClick={() => navigate("/detail", { state: { id: login } })}
+      onClick={() => handleMoveMemberDetail()}
     >
       <AvatarBox>
         <img src={avatar} alt="" loading="lazy" width={80} height={80} />

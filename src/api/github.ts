@@ -35,3 +35,18 @@ export const memberInfoGET = (memberLoginId: string) => {
       });
   });
 };
+
+export const memberProfileRepoGET = (memberLoginId: string) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}repos/${memberLoginId}/${memberLoginId}/contents/README.md`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
