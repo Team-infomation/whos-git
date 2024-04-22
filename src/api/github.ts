@@ -3,7 +3,7 @@ import axios from "axios";
 
 const url = "https://api.github.com/";
 const token = import.meta.env.VITE_APP_GITHUB_TOKEN;
-
+// SEARCH
 export const memberSearchGET = (keyword: string) => {
   return new Promise((resolve, reject) => {
     axios
@@ -20,7 +20,7 @@ export const memberSearchGET = (keyword: string) => {
       });
   });
 };
-
+// DETAIL
 export const memberInfoGET = (memberLoginId: string) => {
   return new Promise((resolve, reject) => {
     axios
@@ -35,11 +35,26 @@ export const memberInfoGET = (memberLoginId: string) => {
       });
   });
 };
-
+// CUSTOM PROFILE
 export const memberProfileRepoGET = (memberLoginId: string) => {
   return new Promise((resolve, reject) => {
     axios
       .get(`${url}repos/${memberLoginId}/${memberLoginId}/contents/README.md`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+// REPOSITORY LIST
+export const memberRepositoryListGET = (uri: string) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${uri}`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {
