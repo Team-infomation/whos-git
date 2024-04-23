@@ -1,11 +1,13 @@
 import { create } from "zustand";
 
-interface CommonStroe {
+interface CommonStore {
   resultPage: boolean;
+  setResultPage: any;
   headerFixed: boolean;
+  setHeaderFixed: any;
 }
 
-export const commonStroe = create<CommonStroe>((set) => ({
+export const commonStore = create<CommonStore>((set) => ({
   resultPage: false,
   setResultPage: (resultPage: boolean) => set(() => ({ resultPage })),
   headerFixed: false,

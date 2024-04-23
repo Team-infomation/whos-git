@@ -54,7 +54,7 @@ export const memberProfileRepoGET = (memberLoginId: string) => {
 export const memberRepositoryListGET = (uri: string) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${uri}`, {
+      .get(uri, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {
