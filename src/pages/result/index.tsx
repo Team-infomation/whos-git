@@ -1,5 +1,7 @@
 // MODULE
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
 // ZUSTAND
 import { searchStore } from "../../store/searchStore";
@@ -20,11 +22,21 @@ const ResultSection = styled.div`
 `;
 
 const Result: React.FC<Props> = () => {
-  const { searchResult } = searchStore();
+  const { searchResult, page, setPage } = searchStore();
   const { state } = useLocation();
   const totalCount: number = searchResult.total_count;
   const resultObject = searchResult.items;
-  console.log(searchResult);
+  const MaxPage = Math.ceil(totalCount / 30);
+
+  // const [page, setPage] = useState<number>(1);
+  const [listRef, listInView] = useInView();
+
+  useEffect(() => {
+    if (listInView && page < MaxPage) {
+      setPage(page + 1);
+      console.log("result", page);
+    }
+  }, [listInView, searchResult]);
   return (
     <div className="con">
       <ResultSection>
@@ -33,8 +45,9 @@ const Result: React.FC<Props> = () => {
         </p>
         <br />총<span>{totalCount}개</span>의 결과
         <ul>
-          {resultObject.map((item: any) => (
+          {resultObject.map((item: any, index: number) => (
             <li key={item.login}>
+              <div>{index + 1}</div>
               <ResultItem
                 login={item.login}
                 id={item.id}
@@ -44,6 +57,7 @@ const Result: React.FC<Props> = () => {
               />
             </li>
           ))}
+          {resultObject.length > 29 && <li ref={listRef}></li>}
         </ul>
       </ResultSection>
     </div>

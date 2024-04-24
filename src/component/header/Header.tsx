@@ -1,4 +1,5 @@
 // MODULE
+import { useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 // API
@@ -78,7 +79,8 @@ const AvatarBox = styled.div`
 `;
 const Header: React.FC<Props> = () => {
   const navigate = useNavigate();
-  const { keyword, setKeyword, setSearchResult } = searchStore();
+  const { keyword, setKeyword, searchResult, setSearchResult, page, setPage } =
+    searchStore();
   const { headerFixed, setHeaderFixed } = commonStore();
 
   const StorageData: unknown | any = localStorage.getItem("userData");
@@ -94,14 +96,29 @@ const Header: React.FC<Props> = () => {
 
   const handleSearchMember = async () => {
     try {
-      const response: unknown | any = await memberSearchGET(keyword);
+      const response: unknown | any = await memberSearchGET(keyword, 1);
       setHeaderFixed(false);
       setSearchResult(response.data);
       navigate("result", { state: { searchKeyword: keyword } });
+      setPage(1);
     } catch (error) {
       console.log(error);
     }
   };
+  const scrollSearchMember = async () => {
+    try {
+      const response: unknown | any = await memberSearchGET(keyword, page);
+      setSearchResult((searchResult: unknown | any) => [
+        ...searchResult,
+        ...response?.data,
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    // scrollSearchMember();
+  }, [page]);
   return (
     <SearchBar id={`header`} className={`${headerFixed ? "active" : ""} fixed`}>
       <div className="con">

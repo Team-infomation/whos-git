@@ -4,10 +4,10 @@ import axios from "axios";
 const url = "https://api.github.com/";
 const token = import.meta.env.VITE_APP_GITHUB_TOKEN;
 // SEARCH
-export const memberSearchGET = (keyword: string) => {
+export const memberSearchGET = (keyword: string, page: number) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url}search/users?q=${keyword}`, {
+      .get(`${url}search/users?q=${keyword}&page=${page}`, {
         headers: {
           Authorization: `token ${token}`,
         },

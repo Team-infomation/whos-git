@@ -1,8 +1,8 @@
 // MODULE
 import { useEffect, useLayoutEffect, useState } from "react";
 import { ScrollRestoration, useLocation } from "react-router-dom";
-import styled from "styled-components";
 import { useInView } from "react-intersection-observer";
+import styled from "styled-components";
 // ZUSTAND
 import { commonStore } from "../../store/commonStore";
 // API
