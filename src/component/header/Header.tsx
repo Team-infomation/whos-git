@@ -37,10 +37,13 @@ const SearchBar = styled.header`
           font-size: 1.6rem;
         }
       }
-      .member_info {
+      &.member_info {
         flex-grow: 0;
         width: 0;
         overflow: hidden;
+        * {
+          white-space: nowrap;
+        }
       }
     }
   }
@@ -66,9 +69,9 @@ const SearchButton = styled.button`
   color: var(--white);
 `;
 const AvatarBox = styled.div`
-  flex-basis: 8rem;
-  width: 12rem;
-  height: 12rem;
+  flex-basis: 5rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 50%;
   border: 1px solid var(--light-gray);
   overflow: hidden;
@@ -76,15 +79,23 @@ const AvatarBox = styled.div`
 const Header: React.FC<Props> = () => {
   const navigate = useNavigate();
   const { keyword, setKeyword, setSearchResult } = searchStore();
-  const { headerFixed } = commonStore();
+  const { headerFixed, setHeaderFixed } = commonStore();
+
+  const StorageData: unknown | any = localStorage.getItem("userData");
+
   const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setKeyword(e.target.value);
   };
+  const handleMoveHome = () => {
+    setHeaderFixed(false);
+    navigate("/");
+  };
+
   const handleSearchMember = async () => {
     try {
       const response: unknown | any = await memberSearchGET(keyword);
-      console.log(response);
+      setHeaderFixed(false);
       setSearchResult(response.data);
       navigate("result", { state: { searchKeyword: keyword } });
     } catch (error) {
@@ -95,14 +106,27 @@ const Header: React.FC<Props> = () => {
     <SearchBar id={`header`} className={`${headerFixed ? "active" : ""} fixed`}>
       <div className="con">
         <ul className="flex flex_jc_sb flex_ai_c">
-          <li className={`logo_section`} onClick={() => navigate("/")}>
+          <li className={`logo_section`} onClick={() => handleMoveHome()}>
             <img src={Logo} alt="" loading="lazy" width={50} height={50} />
           </li>
           <li className={`member_info flex flex_jc_c flex_ai_c`}>
-            <img src={Logo} alt="" loading="lazy" width={50} height={50} />
-            <p>
-              <span>사용자</span>님의 github 정보 보는중
-            </p>
+            {StorageData !== null && (
+              <>
+                <AvatarBox>
+                  <img
+                    src={JSON.parse(StorageData).avatar_url}
+                    alt=""
+                    loading="lazy"
+                    width={50}
+                    height={50}
+                  />
+                </AvatarBox>
+                <p>
+                  <span>{JSON.parse(StorageData).login}</span>님의 github 정보
+                  보는중
+                </p>
+              </>
+            )}
           </li>
           <li className={`search_input flex flex_ai_c`}>
             <label htmlFor="keyword"></label>

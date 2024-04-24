@@ -51,10 +51,10 @@ export const memberProfileRepoGET = (memberLoginId: string) => {
   });
 };
 // REPOSITORY LIST
-export const memberRepositoryListGET = (uri: string) => {
+export const memberRepositoryListGET = (uri: string, page: number) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(uri, {
+      .get(`${uri}?page=${page}`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {

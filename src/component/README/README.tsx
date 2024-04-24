@@ -3,7 +3,7 @@ import React from "react";
 import Markdown from "react-markdown";
 import styled from "styled-components";
 import rehypeRaw from "rehype-raw";
-import remarkEmoji from "remark-emoji";
+import { Buffer } from "buffer";
 // TYPE
 interface Props {
   readme: string;
@@ -29,18 +29,12 @@ const ReadMeBox = styled.div`
   }
 `;
 const README: React.FC<Props> = ({ readme }) => {
-  const markdownChange = () => {
-    try {
-      const decodedString = atob(readme);
-      return decodedString;
-    } catch (error) {
-      console.error("Error decoding base64:", error);
-    }
-  };
-  const plugins = [rehypeRaw, remarkEmoji];
+  const buffer = Buffer.from(readme, "base64").toString("utf8");
+  const plugins = [rehypeRaw];
+
   return (
     <ReadMeBox>
-      <Markdown rehypePlugins={plugins}>{markdownChange()}</Markdown>
+      <Markdown rehypePlugins={plugins}>{buffer}</Markdown>
     </ReadMeBox>
   );
 };

@@ -1,6 +1,6 @@
 // MODULE
 import { useEffect, useLayoutEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { ScrollRestoration, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { useInView } from "react-intersection-observer";
 // ZUSTAND
@@ -18,6 +18,8 @@ import RepositoryItem from "../../component/repositoryItem";
 interface Props {
   public_repo_count: number;
   public_repo: any;
+  listRef: any;
+  listInView: any;
 }
 // STYLED
 const TabButton = styled.div`
@@ -53,14 +55,9 @@ const RepoBox = styled.div`
 const RepositoryList: React.FC<Props> = ({
   public_repo_count,
   public_repo,
+  listRef,
+  listInView,
 }) => {
-  const [ref, inView] = useInView();
-  useEffect(() => {
-    if (inView) {
-      console.log("리스트");
-    } else {
-    }
-  }, [inView]);
   return (
     <RepoBox>
       <h5>
@@ -69,10 +66,14 @@ const RepositoryList: React.FC<Props> = ({
       <ul>
         {public_repo !== null &&
           public_repo.map((repo: any, index: number) => (
-            <li key={index}>
+            <li key={repo.id}>
+              <span>{index + 1}</span>
               <RepositoryItem repoData={repo} />
             </li>
           ))}
+        {public_repo !== null && public_repo.length > 29 && (
+          <li ref={listRef}></li>
+        )}
       </ul>
     </RepoBox>
   );
@@ -80,20 +81,24 @@ const RepositoryList: React.FC<Props> = ({
 
 const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
+  const { setHeaderFixed } = commonStore();
+
   const [userData, setUserData] = useState<any>(null);
   const [profileRepo, setProfileRepo] = useState<any | string>(null);
   const [publicRepo, setPublicRepo] = useState<any | object>(null);
+  const [page, setPage] = useState<number>(1);
   const [tabActive, setTabActive] = useState<string>("repo");
   const [ref, inView] = useInView();
+  const [listRef, listInView] = useInView();
 
-  const { setHeaderFixed } = commonStore();
   const StorageData: unknown | any = localStorage.getItem("userData");
+  const MaxPage: number = Math.ceil(userData?.public_repos / 30);
   const getMemberInfo = async () => {
     try {
       const response: unknown | any = await memberInfoGET(state.id);
       setUserData(response?.data);
       localStorage.setItem("userData", JSON.stringify(response?.data));
-      getCurrentUserRepoList(response?.data.repos_url);
+      getCurrentUserRepoList(response?.data.repos_url, page);
     } catch (error) {
       console.log(error);
     } finally {
@@ -108,11 +113,17 @@ const MemberDetail: React.FC<Props> = () => {
       console.log(error);
     }
   };
-  const getCurrentUserRepoList = async (url: string) => {
+  const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
-      const response: unknown | any = await memberRepositoryListGET(url);
-      console.log(response);
-      setPublicRepo(response?.data);
+      const response: unknown | any = await memberRepositoryListGET(url, page);
+      if (page === 1) {
+        setPublicRepo(response?.data);
+      } else {
+        setPublicRepo((prevData: unknown | any) => [
+          ...prevData,
+          ...response?.data,
+        ]);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -123,7 +134,7 @@ const MemberDetail: React.FC<Props> = () => {
       getMemberInfo();
     } else {
       setUserData(JSON.parse(StorageData));
-      getCurrentUserRepoList(JSON.parse(StorageData).repos_url);
+      getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
     }
     getMemberProfileREADME();
   }, []);
@@ -134,7 +145,11 @@ const MemberDetail: React.FC<Props> = () => {
     } else {
       setHeaderFixed(true);
     }
-  }, [inView]);
+    if (listInView && page < MaxPage) {
+      setPage(page + 1);
+      getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
+    }
+  }, [inView, listInView, page]);
   return (
     <div className="con">
       <div className="observer_box" ref={ref}>
@@ -156,9 +171,12 @@ const MemberDetail: React.FC<Props> = () => {
         </ul>
       </TabButton>
       <div>
+        <ScrollRestoration />
         <RepositoryList
           public_repo_count={userData?.public_repos}
           public_repo={publicRepo}
+          listRef={listRef}
+          listInView={listInView}
         />
       </div>
     </div>
