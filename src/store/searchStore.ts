@@ -12,7 +12,7 @@ interface SearchStore {
 export const searchStore = create<SearchStore>((set) => ({
   keyword: "",
   setKeyword: (keyword: string) => set((state: any) => ({ keyword })),
-  searchResult: [],
+  searchResult: null,
   setSearchResult: (searchResult: any[]) =>
     set((state: any) => ({ searchResult })),
   page: 1,

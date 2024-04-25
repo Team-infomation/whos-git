@@ -19,7 +19,6 @@ interface Props {
   public_repo_count: number;
   public_repo: any;
   listRef: any;
-  listInView: any;
 }
 // STYLED
 const TabButton = styled.div`
@@ -56,7 +55,6 @@ const RepositoryList: React.FC<Props> = ({
   public_repo_count,
   public_repo,
   listRef,
-  listInView,
 }) => {
   return (
     <RepoBox>
@@ -67,7 +65,6 @@ const RepositoryList: React.FC<Props> = ({
         {public_repo !== null &&
           public_repo.map((repo: any, index: number) => (
             <li key={repo.id}>
-              <span>{index + 1}</span>
               <RepositoryItem repoData={repo} />
             </li>
           ))}
@@ -116,14 +113,7 @@ const MemberDetail: React.FC<Props> = () => {
   const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
       const response: unknown | any = await memberRepositoryListGET(url, page);
-      if (page === 1) {
-        setPublicRepo(response?.data);
-      } else {
-        setPublicRepo((prevData: unknown | any) => [
-          ...prevData,
-          ...response?.data,
-        ]);
-      }
+      setPublicRepo(response?.data);
     } catch (error) {
       console.log(error);
     }
@@ -140,6 +130,21 @@ const MemberDetail: React.FC<Props> = () => {
   }, []);
 
   useEffect(() => {
+    const nextPage = page + 1;
+    const scrollRepoList = async (url: string, page: number) => {
+      try {
+        const response: unknown | any = await memberRepositoryListGET(
+          url,
+          page
+        );
+        setPublicRepo((prevData: unknown | any) => [
+          ...prevData,
+          ...response?.data,
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     if (inView) {
       setHeaderFixed(false);
     } else {
@@ -147,9 +152,9 @@ const MemberDetail: React.FC<Props> = () => {
     }
     if (listInView && page < MaxPage) {
       setPage(page + 1);
-      getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
+      scrollRepoList(JSON.parse(StorageData).repos_url, nextPage);
     }
-  }, [inView, listInView, page]);
+  }, [inView, listInView]);
   return (
     <div className="con">
       <div className="observer_box" ref={ref}>
@@ -176,7 +181,6 @@ const MemberDetail: React.FC<Props> = () => {
           public_repo_count={userData?.public_repos}
           public_repo={publicRepo}
           listRef={listRef}
-          listInView={listInView}
         />
       </div>
     </div>

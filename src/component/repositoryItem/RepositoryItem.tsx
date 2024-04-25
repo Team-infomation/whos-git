@@ -16,6 +16,18 @@ const RepoBox = styled.div`
     font-weight: 700;
   }
 `;
+const CloneButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-basis: 8rem;
+  height: 2.5rem;
+  background: #314d76;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--white);
+`;
 const RepositoryItem: React.FC<Props> = ({ repoData }) => {
   const handleCopyGeiCloneURL = (url: string) => {
     console.log(url);
@@ -24,9 +36,9 @@ const RepositoryItem: React.FC<Props> = ({ repoData }) => {
     <RepoBox className="flex flex_ai_c flex_jc_sb">
       <h2>{repoData.name}</h2>
       <UpdateAt updatedAt={repoData.updated_at} textType={"commit"} />
-      <button onClick={() => handleCopyGeiCloneURL(repoData.clone_url)}>
+      <CloneButton onClick={() => handleCopyGeiCloneURL(repoData.clone_url)}>
         Clone
-      </button>
+      </CloneButton>
     </RepoBox>
   );
 };

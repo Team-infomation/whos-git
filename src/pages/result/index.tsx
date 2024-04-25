@@ -1,8 +1,10 @@
 // MODULE
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
+// API
+import { memberSearchGET } from "../../api/github";
 // ZUSTAND
 import { searchStore } from "../../store/searchStore";
 // COMPONENT
@@ -22,21 +24,37 @@ const ResultSection = styled.div`
 `;
 
 const Result: React.FC<Props> = () => {
-  const { searchResult, page, setPage } = searchStore();
+  const { searchResult, page, setPage, keyword } = searchStore();
   const { state } = useLocation();
   const totalCount: number = searchResult.total_count;
   const resultObject = searchResult.items;
   const MaxPage = Math.ceil(totalCount / 30);
 
-  // const [page, setPage] = useState<number>(1);
+  const [data, setData] = useState<any | null>(null);
   const [listRef, listInView] = useInView();
-
   useEffect(() => {
+    const nextPage = page + 1;
+    const scrollSearchMember = async (nextPage: number) => {
+      try {
+        const response: unknown | any = await memberSearchGET(
+          keyword,
+          nextPage
+        );
+        setData((prevData: any) => [...prevData, ...response?.data.items]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     if (listInView && page < MaxPage) {
       setPage(page + 1);
-      console.log("result", page);
+      scrollSearchMember(nextPage);
+    } else {
+      return;
     }
-  }, [listInView, searchResult]);
+  }, [listInView]);
+  useLayoutEffect(() => {
+    setData(resultObject);
+  }, [resultObject]);
   return (
     <div className="con">
       <ResultSection>
@@ -45,19 +63,20 @@ const Result: React.FC<Props> = () => {
         </p>
         <br />총<span>{totalCount}개</span>의 결과
         <ul>
-          {resultObject.map((item: any, index: number) => (
-            <li key={item.login}>
-              <div>{index + 1}</div>
-              <ResultItem
-                login={item.login}
-                id={item.id}
-                type={item.type}
-                avatar={item.avatar_url}
-                follower={item.followers_url}
-              />
-            </li>
-          ))}
-          {resultObject.length > 29 && <li ref={listRef}></li>}
+          {data !== null &&
+            data.map((item: any, index: number) => (
+              <li key={index}>
+                <div>{index + 1}</div>
+                <ResultItem
+                  login={item.login}
+                  id={item.id}
+                  type={item.type}
+                  avatar={item.avatar_url}
+                  follower={item.followers_url}
+                />
+              </li>
+            ))}
+          {data !== null && data.length > 29 && <li ref={listRef}></li>}
         </ul>
       </ResultSection>
     </div>
