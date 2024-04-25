@@ -12,6 +12,7 @@ const RepoBox = styled.div`
   margin-bottom: 1.5rem;
   border: 1px solid var(--light-gray);
   h2 {
+    flex-grow: 1;
     font-size: 2rem;
     font-weight: 700;
   }
@@ -22,6 +23,7 @@ const CloneButton = styled.button`
   align-items: center;
   flex-basis: 8rem;
   height: 2.5rem;
+  margin-left: 2rem;
   background: #314d76;
   border-radius: 0.5rem;
   font-size: 1.6rem;

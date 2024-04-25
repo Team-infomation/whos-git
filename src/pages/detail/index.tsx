@@ -49,6 +49,17 @@ const RepoBox = styled.div`
   border: 1px solid var(--light-gray);
   h5 {
     font-size: 1.6rem;
+    font-weight: 600;
+    span {
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+  }
+  ul {
+    margin-top: 2rem;
+    li {
+      pointer: crosshair;
+    }
   }
 `;
 const RepositoryList: React.FC<Props> = ({
@@ -63,7 +74,7 @@ const RepositoryList: React.FC<Props> = ({
       </h5>
       <ul>
         {public_repo !== null &&
-          public_repo.map((repo: any, index: number) => (
+          public_repo.map((repo: any) => (
             <li key={repo.id}>
               <RepositoryItem repoData={repo} />
             </li>
