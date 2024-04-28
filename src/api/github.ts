@@ -69,7 +69,7 @@ export const memberRepositoryListGET = (uri: string, page: number) => {
 export const memberRepositoryInfoGET = (loginId: string, repoName: string) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url}repos/${loginId}/${repoName}`, {
+      .get(`${url}repos/${loginId}/${repoName}/contents`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {

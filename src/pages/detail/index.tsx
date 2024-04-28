@@ -19,9 +19,10 @@ import RepositoryDetail from "../../component/repositoryDetail";
 // TYPE
 interface Props {
   public_repo_count: number | null;
-  public_repo: Repo | null;
+  public_repo: Repo | unknown;
   loginId: string;
   listRef: any;
+  setAPIData: (APIData: object) => void;
 }
 interface Repo {
   id: number;
@@ -82,14 +83,17 @@ const RepositoryList: React.FC<Props> = ({
   public_repo,
   loginId,
   listRef,
+  setAPIData,
 }) => {
   const { setDetailView } = commonStore();
 
   const handleChangeRepositoryDetail = async (repo: Repo) => {
-    console.log(repo);
     try {
-      const response: any = await memberRepositoryInfoGET(loginId, repo.name);
-      console.log(response);
+      const response: unknown = await memberRepositoryInfoGET(
+        loginId,
+        repo.name
+      );
+      setAPIData(response?.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -112,7 +116,7 @@ const RepositoryList: React.FC<Props> = ({
               <RepositoryItem repoData={repo} />
             </li>
           ))}
-        {public_repo !== null && public_repo.length > 29 && (
+        {public_repo !== null && public_repo?.length > 29 && (
           <li ref={listRef}></li>
         )}
       </ul>
@@ -122,11 +126,12 @@ const RepositoryList: React.FC<Props> = ({
 
 const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
-  const { setHeaderFixed, detailView } = commonStore();
+  const { setHeaderFixed, detailView, setDetailView } = commonStore();
 
   const [userData, setUserData] = useState<Repo | null>(null);
   const [profileRepo, setProfileRepo] = useState<string | null>(null);
   const [publicRepo, setPublicRepo] = useState<unknown | object>(null);
+  const [APIData, setAPIData] = useState<unknown | object>([]);
   const [page, setPage] = useState<number>(1);
   const [tabActive, setTabActive] = useState<string>("repo");
   const [ref, inView] = useInView();
@@ -148,7 +153,7 @@ const MemberDetail: React.FC<Props> = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      console.log("로딩완료");
+      console.log("finally");
     }
   };
   const getMemberProfileREADME = async () => {
@@ -169,6 +174,7 @@ const MemberDetail: React.FC<Props> = () => {
   };
 
   useLayoutEffect(() => {
+    setDetailView("userInfo");
     if (StorageData === null) {
       getMemberInfo();
     } else {
@@ -196,7 +202,7 @@ const MemberDetail: React.FC<Props> = () => {
     } else {
       setHeaderFixed(true);
     }
-    if (listInView && page < MaxPage) {
+    if (listInView && page < MaxPage && StorageData !== null) {
       setPage(page + 1);
       scrollRepoList(JSON.parse(StorageData).repos_url, nextPage);
     }
@@ -206,7 +212,7 @@ const MemberDetail: React.FC<Props> = () => {
       {detailView === "userInfo" ? (
         <>
           <div className="observer_box" ref={ref}>
-            {userData !== null && profileRepo !== null && (
+            {userData && profileRepo !== null && (
               <UserDetailInfo
                 avatar={userData?.avatar_url}
                 loginId={userData?.login}
@@ -249,22 +255,23 @@ const MemberDetail: React.FC<Props> = () => {
             {tabActive === "repo" ? (
               <>
                 <ScrollRestoration />
-                {publicRepo !== null && userData !== null && (
+                {publicRepo && userData && StorageData !== null && (
                   <RepositoryList
                     public_repo_count={userData?.public_repos}
                     public_repo={publicRepo}
                     loginId={JSON.parse(StorageData).login}
                     listRef={listRef}
+                    setAPIData={setAPIData}
                   />
                 )}
               </>
             ) : (
-              <RepositoryDetail />
+              ""
             )}
           </div>
         </>
       ) : (
-        ""
+        <RepositoryDetail apiData={APIData} />
       )}
     </div>
   );

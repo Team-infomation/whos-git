@@ -32,7 +32,7 @@ const AvatarBox = styled.div`
   border: 1px solid var(--light-gray);
   overflow: hidden;
 `;
-const ResultItem: React.FC<Props> = ({ login, id, type, avatar, follower }) => {
+const ResultItem: React.FC<Props> = ({ login, type, avatar, follower }) => {
   const navigate = useNavigate();
   const handleMoveMemberDetail = () => {
     navigate("/detail", { state: { id: login } });
