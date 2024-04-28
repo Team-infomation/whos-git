@@ -158,7 +158,10 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getMemberProfileREADME = async () => {
     try {
-      const response: unknown | Repo = await memberProfileRepoGET(state.id);
+      const response: unknown | Repo = await memberProfileRepoGET(
+        state.id,
+        state.id
+      );
       setProfileRepo(response?.data.content);
     } catch (error) {
       console.log(error);

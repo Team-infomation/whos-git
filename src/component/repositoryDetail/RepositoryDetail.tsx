@@ -1,6 +1,8 @@
 // MODULE
 import { useState } from "react";
 import styled from "styled-components";
+import README from "../README";
+import { memberProfileRepoGET } from "../../api/github";
 // TYPE
 interface Props {
   apiData: unknown;
@@ -35,6 +37,19 @@ const RepositoryDetail: React.FC<Props> = ({ apiData }) => {
     setTabActive(value);
   };
   console.log("data", apiData);
+  let readmeElement;
+  for (let i = 0; i < apiData.length; i++) {
+    if (apiData[i].name === "README.md") {
+      readmeElement = apiData[i];
+      break;
+    }
+  }
+
+  if (readmeElement) {
+    console.log("Found element:", readmeElement);
+  } else {
+    console.log("README.md not found in the array");
+  }
   return (
     <div className="con">
       <TabButton>
@@ -87,6 +102,7 @@ const RepositoryDetail: React.FC<Props> = ({ apiData }) => {
           </li>
         </ul>
       </TabButton>
+      {/* <README readme={readmeElement} /> */}
     </div>
   );
 };

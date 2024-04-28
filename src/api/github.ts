@@ -36,10 +36,13 @@ export const memberInfoGET = (memberLoginId: string) => {
   });
 };
 // CUSTOM PROFILE
-export const memberProfileRepoGET = (memberLoginId: string) => {
+export const memberProfileRepoGET = (
+  memberLoginId: string,
+  repoName: string
+) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url}repos/${memberLoginId}/${memberLoginId}/contents/README.md`, {
+      .get(`${url}repos/${memberLoginId}/${repoName}/contents/README.md`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {
