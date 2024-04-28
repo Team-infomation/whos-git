@@ -10,15 +10,30 @@ import {
   memberInfoGET,
   memberProfileRepoGET,
   memberRepositoryListGET,
+  memberRepositoryInfoGET,
 } from "../../api/github";
 // COMPONENT
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
+import RepositoryDetail from "../../component/repositoryDetail";
 // TYPE
 interface Props {
-  public_repo_count: number;
-  public_repo: any;
+  public_repo_count: number | null;
+  public_repo: Repo | null;
+  loginId: string;
   listRef: any;
+}
+interface Repo {
+  id: number;
+  data: unknown;
+  length: number;
+  name: string;
+  clone_url: string;
+  updated_at: string;
+  avatar_url: string;
+  login: string;
+  bio: string;
+  public_repos: number;
 }
 // STYLED
 const TabButton = styled.div`
@@ -58,15 +73,29 @@ const RepoBox = styled.div`
   ul {
     margin-top: 2rem;
     li {
-      pointer: crosshair;
+      cursor: crosshair;
     }
   }
 `;
 const RepositoryList: React.FC<Props> = ({
   public_repo_count,
   public_repo,
+  loginId,
   listRef,
 }) => {
+  const { setDetailView } = commonStore();
+
+  const handleChangeRepositoryDetail = async (repo: Repo) => {
+    console.log(repo);
+    try {
+      const response: any = await memberRepositoryInfoGET(loginId, repo.name);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setDetailView("repoInfo");
+    }
+  };
   return (
     <RepoBox>
       <h5>
@@ -74,8 +103,12 @@ const RepositoryList: React.FC<Props> = ({
       </h5>
       <ul>
         {public_repo !== null &&
-          public_repo.map((repo: any) => (
-            <li key={repo.id}>
+          Array.isArray(public_repo) &&
+          public_repo.map((repo: Repo) => (
+            <li
+              key={repo.id}
+              onClick={() => handleChangeRepositoryDetail(repo)}
+            >
               <RepositoryItem repoData={repo} />
             </li>
           ))}
@@ -89,21 +122,26 @@ const RepositoryList: React.FC<Props> = ({
 
 const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
-  const { setHeaderFixed } = commonStore();
+  const { setHeaderFixed, detailView } = commonStore();
 
-  const [userData, setUserData] = useState<any>(null);
-  const [profileRepo, setProfileRepo] = useState<any | string>(null);
-  const [publicRepo, setPublicRepo] = useState<any | object>(null);
+  const [userData, setUserData] = useState<Repo | null>(null);
+  const [profileRepo, setProfileRepo] = useState<string | null>(null);
+  const [publicRepo, setPublicRepo] = useState<unknown | object>(null);
   const [page, setPage] = useState<number>(1);
   const [tabActive, setTabActive] = useState<string>("repo");
   const [ref, inView] = useInView();
   const [listRef, listInView] = useInView();
 
-  const StorageData: unknown | any = localStorage.getItem("userData");
-  const MaxPage: number = Math.ceil(userData?.public_repos / 30);
+  const StorageData = localStorage.getItem("userData");
+  const MaxPage: number =
+    userData !== null ? Math.ceil(userData.public_repos / 30) : 0;
+
+  const handleTabmenuButton = (value: string) => {
+    setTabActive(value);
+  };
   const getMemberInfo = async () => {
     try {
-      const response: unknown | any = await memberInfoGET(state.id);
+      const response: unknown | Repo = await memberInfoGET(state.id);
       setUserData(response?.data);
       localStorage.setItem("userData", JSON.stringify(response?.data));
       getCurrentUserRepoList(response?.data.repos_url, page);
@@ -115,7 +153,7 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getMemberProfileREADME = async () => {
     try {
-      const response: unknown | any = await memberProfileRepoGET(state.id);
+      const response: unknown | Repo = await memberProfileRepoGET(state.id);
       setProfileRepo(response?.data.content);
     } catch (error) {
       console.log(error);
@@ -123,7 +161,7 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
-      const response: unknown | any = await memberRepositoryListGET(url, page);
+      const response: unknown | Repo = await memberRepositoryListGET(url, page);
       setPublicRepo(response?.data);
     } catch (error) {
       console.log(error);
@@ -144,14 +182,11 @@ const MemberDetail: React.FC<Props> = () => {
     const nextPage = page + 1;
     const scrollRepoList = async (url: string, page: number) => {
       try {
-        const response: unknown | any = await memberRepositoryListGET(
+        const response: Repo | unknown = await memberRepositoryListGET(
           url,
           page
         );
-        setPublicRepo((prevData: unknown | any) => [
-          ...prevData,
-          ...response?.data,
-        ]);
+        setPublicRepo((prevData: object[]) => [...prevData, ...response.data]);
       } catch (error) {
         console.log(error);
       }
@@ -168,32 +203,69 @@ const MemberDetail: React.FC<Props> = () => {
   }, [inView, listInView]);
   return (
     <div className="con">
-      <div className="observer_box" ref={ref}>
-        <UserDetailInfo
-          avatar={userData?.avatar_url}
-          loginId={userData?.login}
-          profileRepo={profileRepo}
-          bio={userData?.bio}
-        />
-      </div>
-      <TabButton>
-        <ul className="flex flex_ai_c">
-          <li id="repo" className="active flex flex_jc_c flex_ai_c cursor_p">
-            Repository
-          </li>
-          <li id="chart" className="flex flex_jc_c flex_ai_c cursor_p">
-            Chart
-          </li>
-        </ul>
-      </TabButton>
-      <div>
-        <ScrollRestoration />
-        <RepositoryList
-          public_repo_count={userData?.public_repos}
-          public_repo={publicRepo}
-          listRef={listRef}
-        />
-      </div>
+      {detailView === "userInfo" ? (
+        <>
+          <div className="observer_box" ref={ref}>
+            {userData !== null && profileRepo !== null && (
+              <UserDetailInfo
+                avatar={userData?.avatar_url}
+                loginId={userData?.login}
+                profileRepo={profileRepo}
+                bio={userData?.bio}
+              />
+            )}
+          </div>
+          <TabButton>
+            <ul className="flex flex_ai_c">
+              <li
+                id="repo"
+                className={`${
+                  tabActive === "repo" && "active"
+                } flex flex_jc_c flex_ai_c cursor_p`}
+              >
+                <button
+                  onClick={() => handleTabmenuButton("repo")}
+                  value="repo"
+                >
+                  Repository
+                </button>
+              </li>
+              <li
+                id="chart"
+                className={`${
+                  tabActive === "chart" && "active"
+                } flex flex_jc_c flex_ai_c cursor_p`}
+              >
+                <button
+                  onClick={() => handleTabmenuButton("chart")}
+                  value="chart"
+                >
+                  Chart
+                </button>
+              </li>
+            </ul>
+          </TabButton>
+          <div>
+            {tabActive === "repo" ? (
+              <>
+                <ScrollRestoration />
+                {publicRepo !== null && userData !== null && (
+                  <RepositoryList
+                    public_repo_count={userData?.public_repos}
+                    public_repo={publicRepo}
+                    loginId={JSON.parse(StorageData).login}
+                    listRef={listRef}
+                  />
+                )}
+              </>
+            ) : (
+              <RepositoryDetail />
+            )}
+          </div>
+        </>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

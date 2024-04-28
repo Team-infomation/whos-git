@@ -4,7 +4,12 @@ import styled from "styled-components";
 import UpdateAt from "../common/updateAt";
 // TYPE
 interface Props {
-  repoData: any;
+  repoData: Repo;
+}
+interface Repo {
+  name: string;
+  clone_url: string;
+  updated_at: string;
 }
 // STYLED
 const RepoBox = styled.div`
@@ -31,14 +36,20 @@ const CloneButton = styled.button`
   color: var(--white);
 `;
 const RepositoryItem: React.FC<Props> = ({ repoData }) => {
-  const handleCopyGeiCloneURL = (url: string) => {
-    console.log(url);
+  const handleCopyGeiCloneURL = (url: string, repoName: string) => {
+    window.navigator.clipboard.writeText(url).then(() => {
+      alert(`${repoName} 리포지토리 주소가 복사되었습니다!`);
+    });
   };
   return (
     <RepoBox className="flex flex_ai_c flex_jc_sb">
       <h2>{repoData.name}</h2>
       <UpdateAt updatedAt={repoData.updated_at} textType={"commit"} />
-      <CloneButton onClick={() => handleCopyGeiCloneURL(repoData.clone_url)}>
+      <CloneButton
+        onClick={() =>
+          handleCopyGeiCloneURL(repoData.clone_url, repoData?.name)
+        }
+      >
         Clone
       </CloneButton>
     </RepoBox>

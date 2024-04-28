@@ -11,6 +11,18 @@ import { commonStore } from "../../store/commonStore";
 import Logo from "/logo.png";
 // TYPE
 interface Props {}
+interface Repo {
+  id: number;
+  data: unknown;
+  length: number;
+  name: string;
+  clone_url: string;
+  updated_at: string;
+  avatar_url: string;
+  login: string;
+  bio: string;
+  public_repos: number;
+}
 // STYLED
 const SearchBar = styled.header`
   box-shadow: 0 0.2rem 1rem 0 rgba(0, 0, 0, 0.2);
@@ -79,11 +91,10 @@ const AvatarBox = styled.div`
 `;
 const Header: React.FC<Props> = () => {
   const navigate = useNavigate();
-  const { keyword, setKeyword, searchResult, setSearchResult, page, setPage } =
-    searchStore();
+  const { keyword, setKeyword, setSearchResult } = searchStore();
   const { headerFixed, setHeaderFixed } = commonStore();
 
-  const StorageData: unknown | any = localStorage.getItem("userData");
+  const StorageData: unknown | Repo = localStorage.getItem("userData");
 
   const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -97,9 +108,9 @@ const Header: React.FC<Props> = () => {
   const handleSearchMember = async () => {
     window.scrollTo(0, 0);
     try {
-      const response: unknown | any = await memberSearchGET(keyword, 1);
+      const response: unknown | Repo = await memberSearchGET(keyword, 1);
       setHeaderFixed(false);
-      setSearchResult(response.data);
+      setSearchResult(response?.data);
       navigate("result", { state: { searchKeyword: keyword } });
     } catch (error) {
       console.log(error);

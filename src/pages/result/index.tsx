@@ -10,7 +10,17 @@ import { searchStore } from "../../store/searchStore";
 // COMPONENT
 import ResultItem from "../../component/resultItem";
 // TYPE
-interface Props {}
+interface Props {
+  item: Repo;
+}
+interface Repo {
+  length: number;
+  login: string;
+  id: number;
+  type: string;
+  avatar_url: string;
+  followers_url: string;
+}
 // STYLED
 const ResultSection = styled.div`
   margin-top: 12rem;
@@ -30,13 +40,13 @@ const Result: React.FC<Props> = () => {
   const resultObject = searchResult.items;
   const MaxPage = Math.ceil(totalCount / 30);
 
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<Repo | null>(null);
   const [listRef, listInView] = useInView();
   useEffect(() => {
     const nextPage = page + 1;
     const scrollSearchMember = async (nextPage: number) => {
       try {
-        const response: unknown | any = await memberSearchGET(
+        const response: unknown | object = await memberSearchGET(
           keyword,
           nextPage
         );
@@ -64,9 +74,9 @@ const Result: React.FC<Props> = () => {
         <br />총<span>{totalCount}개</span>의 결과
         <ul>
           {data !== null &&
-            data.map((item: any, index: number) => (
+            Array.isArray(data) &&
+            data.map((item: Repo, index: number) => (
               <li key={index}>
-                <div>{index + 1}</div>
                 <ResultItem
                   login={item.login}
                   id={item.id}

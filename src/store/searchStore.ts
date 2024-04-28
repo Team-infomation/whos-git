@@ -2,19 +2,18 @@ import { create } from "zustand";
 
 interface SearchStore {
   keyword: string;
-  setKeyword: any;
-  searchResult: any;
-  setSearchResult: any;
+  setKeyword: (keyword: string) => void;
+  searchResult: unknown;
+  setSearchResult: (searchResult: object[]) => void;
   page: number;
-  setPage: any;
+  setPage: (page: number) => void;
 }
 
 export const searchStore = create<SearchStore>((set) => ({
   keyword: "",
-  setKeyword: (keyword: string) => set((state: any) => ({ keyword })),
+  setKeyword: (keyword: string) => set(() => ({ keyword })),
   searchResult: null,
-  setSearchResult: (searchResult: any[]) =>
-    set((state: any) => ({ searchResult })),
+  setSearchResult: (searchResult: object) => set(() => ({ searchResult })),
   page: 1,
-  setPage: (page: number) => set((state: any) => ({ page })),
+  setPage: (page: number) => set(() => ({ page })),
 }));

@@ -65,3 +65,18 @@ export const memberRepositoryListGET = (uri: string, page: number) => {
       });
   });
 };
+// REPOSITORY DETAIL
+export const memberRepositoryInfoGET = (loginId: string, repoName: string) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}repos/${loginId}/${repoName}`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};

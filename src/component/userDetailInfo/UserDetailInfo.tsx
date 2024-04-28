@@ -7,7 +7,7 @@ interface Props {
   avatar: string;
   loginId: string;
   profileRepo: string;
-  bio: any;
+  bio: string | undefined;
 }
 // STYLED
 const AvatarBox = styled.div`

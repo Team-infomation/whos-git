@@ -2,9 +2,11 @@ import { create } from "zustand";
 
 interface CommonStore {
   resultPage: boolean;
-  setResultPage: any;
+  setResultPage: (resultPage: boolean) => void;
   headerFixed: boolean;
-  setHeaderFixed: any;
+  setHeaderFixed: (headerFixed: boolean) => void;
+  detailView: string;
+  setDetailView: (detailView: "userInfo" | "repoInfo") => void;
 }
 
 export const commonStore = create<CommonStore>((set) => ({
@@ -12,4 +14,6 @@ export const commonStore = create<CommonStore>((set) => ({
   setResultPage: (resultPage: boolean) => set(() => ({ resultPage })),
   headerFixed: false,
   setHeaderFixed: (headerFixed: boolean) => set(() => ({ headerFixed })),
+  detailView: "userInfo",
+  setDetailView: (detailView: string) => set(() => ({ detailView })),
 }));
