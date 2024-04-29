@@ -36,7 +36,7 @@ export const memberInfoGET = (memberLoginId: string) => {
   });
 };
 // CUSTOM PROFILE
-export const memberProfileRepoGET = (
+export const memberRepoReadMeGET = (
   memberLoginId: string,
   repoName: string
 ) => {
@@ -73,6 +73,24 @@ export const memberRepositoryInfoGET = (loginId: string, repoName: string) => {
   return new Promise((resolve, reject) => {
     axios
       .get(`${url}repos/${loginId}/${repoName}/contents`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+// REPOSITORY COMMIT
+export const memberRepositoryCommitGET = (
+  loginId: string,
+  repoName: string
+) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}repos/${loginId}/${repoName}/commits`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {

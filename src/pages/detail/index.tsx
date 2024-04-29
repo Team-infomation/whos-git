@@ -8,7 +8,7 @@ import { commonStore } from "../../store/commonStore";
 // API
 import {
   memberInfoGET,
-  memberProfileRepoGET,
+  memberRepoReadMeGET,
   memberRepositoryListGET,
   memberRepositoryInfoGET,
 } from "../../api/github";
@@ -16,13 +16,15 @@ import {
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
 import RepositoryDetail from "../../component/repositoryDetail";
+import Test from "../../component/chart/test/Test";
 // TYPE
 interface Props {
   public_repo_count: number | null;
-  public_repo: Repo | unknown;
+  public_repo: Repo | any;
   loginId: string;
   listRef: any;
   setAPIData: (APIData: object) => void;
+  setRepoName: (repoName: string) => void;
 }
 interface Repo {
   id: number;
@@ -84,12 +86,13 @@ const RepositoryList: React.FC<Props> = ({
   loginId,
   listRef,
   setAPIData,
+  setRepoName,
 }) => {
   const { setDetailView } = commonStore();
 
   const handleChangeRepositoryDetail = async (repo: Repo) => {
     try {
-      const response: unknown = await memberRepositoryInfoGET(
+      const response: any | Repo = await memberRepositoryInfoGET(
         loginId,
         repo.name
       );
@@ -98,6 +101,7 @@ const RepositoryList: React.FC<Props> = ({
       console.log(error);
     } finally {
       setDetailView("repoInfo");
+      setRepoName(repo.name);
     }
   };
   return (
@@ -134,6 +138,7 @@ const MemberDetail: React.FC<Props> = () => {
   const [APIData, setAPIData] = useState<unknown | object>([]);
   const [page, setPage] = useState<number>(1);
   const [tabActive, setTabActive] = useState<string>("repo");
+  const [repoName, setRepoName] = useState<string>("");
   const [ref, inView] = useInView();
   const [listRef, listInView] = useInView();
 
@@ -146,7 +151,7 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getMemberInfo = async () => {
     try {
-      const response: unknown | Repo = await memberInfoGET(state.id);
+      const response: any | Repo = await memberInfoGET(state.id);
       setUserData(response?.data);
       localStorage.setItem("userData", JSON.stringify(response?.data));
       getCurrentUserRepoList(response?.data.repos_url, page);
@@ -158,7 +163,7 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getMemberProfileREADME = async () => {
     try {
-      const response: unknown | Repo = await memberProfileRepoGET(
+      const response: any | Repo = await memberRepoReadMeGET(
         state.id,
         state.id
       );
@@ -169,7 +174,8 @@ const MemberDetail: React.FC<Props> = () => {
   };
   const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
-      const response: unknown | Repo = await memberRepositoryListGET(url, page);
+      const response: any | Repo = await memberRepositoryListGET(url, page);
+      console.log(response?.data);
       setPublicRepo(response?.data);
     } catch (error) {
       console.log(error);
@@ -191,10 +197,7 @@ const MemberDetail: React.FC<Props> = () => {
     const nextPage = page + 1;
     const scrollRepoList = async (url: string, page: number) => {
       try {
-        const response: Repo | unknown = await memberRepositoryListGET(
-          url,
-          page
-        );
+        const response: Repo | any = await memberRepositoryListGET(url, page);
         setPublicRepo((prevData: object[]) => [...prevData, ...response.data]);
       } catch (error) {
         console.log(error);
@@ -265,16 +268,17 @@ const MemberDetail: React.FC<Props> = () => {
                     loginId={JSON.parse(StorageData).login}
                     listRef={listRef}
                     setAPIData={setAPIData}
+                    setRepoName={setRepoName}
                   />
                 )}
               </>
             ) : (
-              ""
+              <Test />
             )}
           </div>
         </>
       ) : (
-        <RepositoryDetail apiData={APIData} />
+        <RepositoryDetail apiData={APIData} repoName={repoName} />
       )}
     </div>
   );

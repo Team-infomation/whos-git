@@ -1,11 +1,17 @@
 // MODULE
 import { useState } from "react";
 import styled from "styled-components";
+// API
+import {
+  memberRepoReadMeGET,
+  memberRepositoryCommitGET,
+} from "../../api/github";
+// COMPONENT
 import README from "../README";
-import { memberProfileRepoGET } from "../../api/github";
 // TYPE
 interface Props {
-  apiData: unknown;
+  apiData: object | any;
+  repoName: string;
 }
 // STYLED
 const TabButton = styled.div`
@@ -31,12 +37,40 @@ const TabButton = styled.div`
     }
   }
 `;
-const RepositoryDetail: React.FC<Props> = ({ apiData }) => {
+const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
   const [tabActive, setTabActive] = useState<string>("readme");
+  const [readMe, setReadMe] = useState<string>("");
+
+  const StorageData: any | object = localStorage.getItem("userData");
+
   const handleTabmenuButton = (value: string) => {
     setTabActive(value);
   };
-  console.log("data", apiData);
+
+  // API
+  const getReadMe = async () => {
+    try {
+      const response: any | object = await memberRepoReadMeGET(
+        JSON.parse(StorageData).login,
+        repoName
+      );
+      setReadMe(response.data.content);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getCommitData = async () => {
+    try {
+      const response: any | object = await memberRepositoryCommitGET(
+        JSON.parse(StorageData).login,
+        repoName
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   let readmeElement;
   for (let i = 0; i < apiData.length; i++) {
     if (apiData[i].name === "README.md") {
@@ -44,11 +78,8 @@ const RepositoryDetail: React.FC<Props> = ({ apiData }) => {
       break;
     }
   }
-
   if (readmeElement) {
-    console.log("Found element:", readmeElement);
-  } else {
-    console.log("README.md not found in the array");
+    getReadMe();
   }
   return (
     <div className="con">
@@ -102,7 +133,13 @@ const RepositoryDetail: React.FC<Props> = ({ apiData }) => {
           </li>
         </ul>
       </TabButton>
-      {/* <README readme={readmeElement} /> */}
+      {tabActive === "readme" && readMe !== "" && <README readme={readMe} />}
+      {tabActive === "commit" && (
+        <>
+          <div>최근 100개 커밋</div>
+          <button onClick={() => getCommitData()}>커밋 가져오기</button>
+        </>
+      )}
     </div>
   );
 };
