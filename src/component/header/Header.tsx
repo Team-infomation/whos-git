@@ -109,7 +109,7 @@ const Header: React.FC<Props> = () => {
   const handleSearchMember = async () => {
     window.scrollTo(0, 0);
     try {
-      // await addKeywordToIndexedDB(keyword);
+      await addKeywordToIndexedDB(keyword);
       const response: any | Repo = await memberSearchGET(keyword, 1);
       setHeaderFixed(false);
       setSearchResult(response?.data);

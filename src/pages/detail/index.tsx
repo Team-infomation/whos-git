@@ -12,6 +12,10 @@ import {
   memberRepositoryListGET,
   memberRepositoryInfoGET,
 } from "../../api/github";
+import {
+  addResultMemberDataToIndexedDB,
+  getResultMemberDataToIndexedDB,
+} from "../../api/IDBcache";
 // COMPONENT
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
@@ -150,11 +154,16 @@ const MemberDetail: React.FC<Props> = () => {
     setTabActive(value);
   };
   const getMemberInfo = async () => {
+    let setTime = new Date();
+    // const getIndexedDB = getResultMemberDataToIndexedDB(state.id);
+    // console.log("aaaa", getIndexedDB);
+
     try {
       const response: any | Repo = await memberInfoGET(state.id);
       setUserData(response?.data);
       localStorage.setItem("userData", JSON.stringify(response?.data));
       getCurrentUserRepoList(response?.data.repos_url, page);
+      await addResultMemberDataToIndexedDB(response?.data, setTime, state.id);
     } catch (error) {
       console.log(error);
     } finally {
@@ -175,7 +184,6 @@ const MemberDetail: React.FC<Props> = () => {
   const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
       const response: any | Repo = await memberRepositoryListGET(url, page);
-      console.log(response?.data);
       setPublicRepo(response?.data);
     } catch (error) {
       console.log(error);
@@ -213,6 +221,9 @@ const MemberDetail: React.FC<Props> = () => {
       scrollRepoList(JSON.parse(StorageData).repos_url, nextPage);
     }
   }, [inView, listInView]);
+  useEffect(() => {
+    getResultMemberDataToIndexedDB(state.id);
+  }, []);
   return (
     <div className="con">
       {detailView === "userInfo" ? (
