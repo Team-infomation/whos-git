@@ -15,13 +15,11 @@ export const addKeywordToIndexedDB = (getKeyword: string) => {
       const keywordDB = transaction.objectStore("keyword");
 
       const keyword = keywordDB.put({ keyword: getKeyword });
-
       keyword.onsuccess = (e) => {
         transaction.oncomplete = () => {
           db.close();
         };
         resolve(e);
-        console.log("keyword", e);
       };
 
       keyword.onerror = (e) => {
@@ -144,6 +142,50 @@ export const addResultDataToIndexedDB = (resultData: object) => {
       transaction.oncomplete = () => {
         db.close();
       };
+    };
+  });
+};
+// CACHE SAVE REPOSITORY REMADME RESULT
+export const addRepositoryReadmeDataToIndexedDB = (resultReadme: string) => {
+  return new Promise((resolve, reject) => {
+    const dbOpen = idb.open("whos_git", 1);
+    dbOpen.onsuccess = () => {
+      const db = dbOpen.result;
+      const transaction = db.transaction("repoReadme", "readwrite");
+      const resultRepoReadmeDB = transaction.objectStore("repoReadme");
+
+      const setResult = resultRepoReadmeDB.put({ data: resultReadme });
+
+      setResult.onsuccess = (e) => {
+        transaction.oncomplete = () => {
+          db.close();
+        };
+        resolve(e);
+        console.log("repoReadme", e);
+      };
+
+      setResult.onerror = (e) => {
+        reject(e);
+      };
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    };
+  });
+};
+// CACHE GET REPOSITORY README
+export const getRepositoryReadmeDataToIndexedDB = (
+  loginId: string,
+  repoName: string
+) => {
+  return new Promise((resolve, reject) => {
+    const dbOpen = idb.open("whos_git", 1);
+
+    dbOpen.onsuccess = () => {
+      let db = dbOpen.result;
+      const transaction = db.transaction("repoReadme", "readonly");
+      const readmeDB = transaction.objectStore("repoReadme");
+      const repoReadme = readmeDB.getAll();
     };
   });
 };

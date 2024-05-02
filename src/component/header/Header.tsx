@@ -1,10 +1,9 @@
 // MODULE
-import { useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 // API
 import { memberSearchGET } from "../../api/github";
-import { addKeywordToIndexedDB } from "../../api/IDBcache";
+
 // ZUSTAND
 import { searchStore } from "../../store/searchStore";
 import { commonStore } from "../../store/commonStore";
@@ -109,7 +108,6 @@ const Header: React.FC<Props> = () => {
   const handleSearchMember = async () => {
     window.scrollTo(0, 0);
     try {
-      await addKeywordToIndexedDB(keyword);
       const response: any | Repo = await memberSearchGET(keyword, 1);
       setHeaderFixed(false);
       setSearchResult(response?.data);
@@ -127,7 +125,7 @@ const Header: React.FC<Props> = () => {
             <img src={Logo} alt="" loading="lazy" width={50} height={50} />
           </li>
           <li className={`member_info flex flex_jc_c flex_ai_c`}>
-            {StorageData !== null && (
+            {StorageData !== null && StorageData !== "undefined" && (
               <>
                 <AvatarBox>
                   <img

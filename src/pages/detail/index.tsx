@@ -153,23 +153,6 @@ const MemberDetail: React.FC<Props> = () => {
   const handleTabmenuButton = (value: string) => {
     setTabActive(value);
   };
-  const getMemberInfo = async () => {
-    let setTime = new Date();
-    // const getIndexedDB = getResultMemberDataToIndexedDB(state.id);
-    // console.log("aaaa", getIndexedDB);
-
-    try {
-      const response: any | Repo = await memberInfoGET(state.id);
-      setUserData(response?.data);
-      localStorage.setItem("userData", JSON.stringify(response?.data));
-      getCurrentUserRepoList(response?.data.repos_url, page);
-      await addResultMemberDataToIndexedDB(response?.data, setTime, state.id);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      console.log("finally");
-    }
-  };
   const getMemberProfileREADME = async () => {
     try {
       const response: any | Repo = await memberRepoReadMeGET(
@@ -181,10 +164,40 @@ const MemberDetail: React.FC<Props> = () => {
       console.log(error);
     }
   };
+  const getMemberInfo = async () => {
+    const setTime = new Date();
+
+    const getIndexedDB: any | Repo = await getResultMemberDataToIndexedDB(
+      state.id
+    );
+
+    if (Array.isArray(getIndexedDB) && getIndexedDB.length === 0) {
+      try {
+        const response: any | Repo = await memberInfoGET(state.id);
+        console.log("api data", response?.data);
+        setUserData(response?.data);
+        localStorage.setItem("userData", JSON.stringify(response?.data));
+        getCurrentUserRepoList(response?.data.repos_url, page);
+        await addResultMemberDataToIndexedDB(response?.data, setTime, state.id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        console.log("finally");
+      }
+    } else {
+      setUserData(getIndexedDB[0].memberResult);
+      localStorage.setItem(
+        "userData",
+        JSON.stringify(getIndexedDB[0].memberResult)
+      );
+      getCurrentUserRepoList(getIndexedDB[0].memberResult.repos_url, page);
+    }
+  };
   const getCurrentUserRepoList = async (url: string, page: number) => {
     try {
       const response: any | Repo = await memberRepositoryListGET(url, page);
       setPublicRepo(response?.data);
+      console.log(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -231,10 +244,10 @@ const MemberDetail: React.FC<Props> = () => {
           <div className="observer_box" ref={ref}>
             {userData && profileRepo !== null && (
               <UserDetailInfo
-                avatar={userData?.avatar_url}
-                loginId={userData?.login}
+                avatar={userData.avatar_url}
+                loginId={userData.login}
                 profileRepo={profileRepo}
-                bio={userData?.bio}
+                bio={userData.bio}
               />
             )}
           </div>

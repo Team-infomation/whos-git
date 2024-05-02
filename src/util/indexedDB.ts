@@ -22,6 +22,10 @@ export const indexedDBStart = () => {
       keyPath: "id",
       autoIncrement: true,
     });
+    const repositoryReadmeStroe = db.createObjectStore("repoReadme", {
+      keyPath: "id",
+      autoIncrement: true,
+    });
     const commitStore = db.createObjectStore("commit", {
       keyPath: "id",
       autoIncrement: true,
@@ -29,10 +33,10 @@ export const indexedDBStart = () => {
 
     console.log("Object stores created successfully");
   };
-  request.onsuccess = (event: any) => {
-    console.log("Database opened successfully");
+  request.onsuccess = (e: any) => {
+    console.log("Database opened successfully", e);
   };
-  request.onerror = (event: any) => {
-    console.error("Error opening database:", event.target.error);
+  request.onerror = (e: any) => {
+    console.error("Error opening database:", e.target.error);
   };
 };

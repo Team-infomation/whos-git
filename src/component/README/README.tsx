@@ -10,8 +10,9 @@ interface Props {
 }
 // STYLED
 const ReadMeBox = styled.div`
-  font-size: unset;
-
+  > * {
+    font-size: unset;
+  }
   padding: 1rem;
   border-radius: 0.5rem;
   border: 1px solid var(--light-gray);
