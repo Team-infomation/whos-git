@@ -75,7 +75,7 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
     const dbOpen = idb.open("whos_git", 1);
 
     dbOpen.onsuccess = () => {
-      let db = dbOpen.result;
+      const db = dbOpen.result;
       const transaction = db.transaction("member", "readwrite");
       const memberDB = transaction.objectStore("member");
       const member = memberDB.getAll();
@@ -90,7 +90,7 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
       // };
       member.onsuccess = (e: any | object) => {
         const result = e.target.result;
-        const currentTime: any = new Date();
+        const currentTime: Date = new Date();
 
         const filteredByLogin = result.filter(
           (item: any) => item.memberId === login
@@ -146,7 +146,11 @@ export const addResultDataToIndexedDB = (resultData: object) => {
   });
 };
 // CACHE SAVE REPOSITORY REMADME RESULT
-export const addRepositoryReadmeDataToIndexedDB = (resultReadme: string) => {
+export const addRepositoryReadmeDataToIndexedDB = (
+  resultReadme: string,
+  repoName: string,
+  loginId: string
+) => {
   return new Promise((resolve, reject) => {
     const dbOpen = idb.open("whos_git", 1);
     dbOpen.onsuccess = () => {
@@ -154,7 +158,12 @@ export const addRepositoryReadmeDataToIndexedDB = (resultReadme: string) => {
       const transaction = db.transaction("repoReadme", "readwrite");
       const resultRepoReadmeDB = transaction.objectStore("repoReadme");
 
-      const setResult = resultRepoReadmeDB.put({ data: resultReadme });
+      const setResult = resultRepoReadmeDB.put({
+        data: resultReadme,
+        repoName: repoName,
+        loginId: loginId,
+        setTime: new Date(),
+      });
 
       setResult.onsuccess = (e) => {
         transaction.oncomplete = () => {
@@ -182,10 +191,31 @@ export const getRepositoryReadmeDataToIndexedDB = (
     const dbOpen = idb.open("whos_git", 1);
 
     dbOpen.onsuccess = () => {
-      let db = dbOpen.result;
+      const db = dbOpen.result;
       const transaction = db.transaction("repoReadme", "readonly");
       const readmeDB = transaction.objectStore("repoReadme");
       const repoReadme = readmeDB.getAll();
+
+      repoReadme.onsuccess = (e: any | object) => {
+        const result = e.target.result;
+        const currentTime: Date = new Date();
+
+        const filterData = result.filter(
+          (item: object) => item.repoName === repoName
+        );
+
+        console.log("DB조회", result);
+        resolve(e);
+      };
+
+      repoReadme.onerror = (e) => {
+        console.log(e);
+        reject(e);
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
     };
   });
 };

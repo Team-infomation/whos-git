@@ -1,11 +1,15 @@
 // MODULE
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 // API
 import {
   memberRepoReadMeGET,
   memberRepositoryCommitGET,
 } from "../../api/github";
+import {
+  addRepositoryReadmeDataToIndexedDB,
+  getRepositoryReadmeDataToIndexedDB,
+} from "../../api/IDBcache";
 // COMPONENT
 import README from "../README";
 // TYPE
@@ -55,6 +59,11 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
         repoName
       );
       setReadMe(response.data.content);
+      addRepositoryReadmeDataToIndexedDB(
+        response.data.content,
+        repoName,
+        JSON.parse(StorageData).login
+      );
     } catch (error) {
       console.log(error);
     }
@@ -81,6 +90,15 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
   if (readmeElement) {
     getReadMe();
   }
+
+  useEffect(() => {
+    setTimeout(() => {
+      getRepositoryReadmeDataToIndexedDB(
+        JSON.parse(StorageData).login,
+        repoName
+      );
+    }, 1000);
+  }, []);
   return (
     <div className="con">
       <TabButton>
