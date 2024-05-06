@@ -200,12 +200,23 @@ export const getRepositoryReadmeDataToIndexedDB = (
         const result = e.target.result;
         const currentTime: Date = new Date();
 
-        const filterData = result.filter(
-          (item: object) => item.repoName === repoName
-        );
+        // const filterData = result.filter(
+        //   (item: object) => item.repoName === repoName
+        // );
 
-        console.log("DB조회", result);
-        resolve(e);
+        const filterData = result.filter((item: object) => {
+          if (!item.repoName) {
+            return false;
+          }
+
+          const itemDate = new Date(item.setTime);
+          const differenceInDays = Math.abs(
+            (currentTime - itemDate) / (1000 * 60 * 60 * 24)
+          );
+
+          return differenceInDays <= 1 && item.repoName === repoName;
+        });
+        resolve(filterData);
       };
 
       repoReadme.onerror = (e) => {

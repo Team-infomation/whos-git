@@ -101,6 +101,7 @@ const RepositoryList: React.FC<Props> = ({
         repo.name
       );
       setAPIData(response?.data);
+      // console.log("저장소 상세정보", response);
     } catch (error) {
       console.log(error);
     } finally {

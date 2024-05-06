@@ -7,14 +7,17 @@ import { Buffer } from "buffer";
 // TYPE
 interface Props {
   readme: string;
+  radius: number;
 }
 // STYLED
 const ReadMeBox = styled.div`
-  > * {
-    font-size: unset;
+  > *,
+  > * * {
+    font-size: revert;
   }
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: ${(props) =>
+    props.borderRadius === undefined ? "0.5rem" : props.borderRadius};
   border: 1px solid var(--light-gray);
   h2 {
     padding-bottom: 0.3em;
@@ -31,12 +34,12 @@ const ReadMeBox = styled.div`
     text-decoration: underline;
   }
 `;
-const README: React.FC<Props> = ({ readme }) => {
+const README: React.FC<Props> = ({ readme, radius }) => {
   const buffer = Buffer.from(readme, "base64").toString("utf8");
   const plugins = [rehypeRaw];
 
   return (
-    <ReadMeBox>
+    <ReadMeBox borderRadius={radius}>
       <Markdown rehypePlugins={plugins}>{buffer}</Markdown>
     </ReadMeBox>
   );

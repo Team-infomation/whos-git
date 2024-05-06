@@ -83,6 +83,25 @@ export const memberRepositoryInfoGET = (loginId: string, repoName: string) => {
       });
   });
 };
+// EXPLOER REPOSITORY FILE AND DIRECTORY DETAIL
+export const exloerRepositoryListGET = (
+  loginId: string,
+  repoName: string,
+  dirName: string
+) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}repos/${loginId}/${repoName}/contents/${dirName}`, {
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
 // REPOSITORY COMMIT
 export const memberRepositoryCommitGET = (
   loginId: string,

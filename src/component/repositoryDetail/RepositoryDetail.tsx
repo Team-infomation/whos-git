@@ -1,5 +1,5 @@
 // MODULE
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 // API
 import {
@@ -12,14 +12,29 @@ import {
 } from "../../api/IDBcache";
 // COMPONENT
 import README from "../README";
+import FileList from "./FileList";
 // TYPE
 interface Props {
   apiData: object | any;
   repoName: string;
 }
 // STYLED
+const RepositoryNameBox = styled.div`
+  margin-top: 11rem;
+  h3 {
+    font-size: 2.4rem;
+    font-weight: 700;
+  }
+`;
+const TypeBox = styled.div`
+  width: 2rem;
+  height: 2rem;
+  margin-right: 1rem;
+  background: ${(props) => props.background};
+  border-radius: 50%;
+`;
 const TabButton = styled.div`
-  margin-top: 9.5rem;
+  margin-top: 2.5rem;
   li {
     flex-basis: 13.5rem;
     height: 3.5rem;
@@ -53,20 +68,31 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
 
   // API
   const getReadMe = async () => {
-    try {
-      const response: any | object = await memberRepoReadMeGET(
-        JSON.parse(StorageData).login,
-        repoName
-      );
-      setReadMe(response.data.content);
-      addRepositoryReadmeDataToIndexedDB(
-        response.data.content,
-        repoName,
-        JSON.parse(StorageData).login
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    await getRepositoryReadmeDataToIndexedDB(
+      JSON.parse(StorageData).login,
+      repoName
+    )
+      .then((response: any | object) => {
+        if (response.length === 0) {
+          memberRepoReadMeGET(JSON.parse(StorageData).login, repoName)
+            .then((response: any | object) => {
+              setReadMe(response.data.content);
+              addRepositoryReadmeDataToIndexedDB(
+                response.data.content,
+                repoName,
+                JSON.parse(StorageData).login
+              );
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else {
+          setReadMe(response[0]?.data);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const getCommitData = async () => {
@@ -91,16 +117,12 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
     getReadMe();
   }
 
-  useEffect(() => {
-    setTimeout(() => {
-      getRepositoryReadmeDataToIndexedDB(
-        JSON.parse(StorageData).login,
-        repoName
-      );
-    }, 1000);
-  }, []);
   return (
     <div className="con">
+      <RepositoryNameBox className="flex flex_jc_s flex_ai_c">
+        <TypeBox background={"red"}></TypeBox>
+        <h3>{repoName}</h3>
+      </RepositoryNameBox>
       <TabButton>
         <ul className="flex flex_ai_c">
           <li
@@ -151,7 +173,16 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
           </li>
         </ul>
       </TabButton>
-      {tabActive === "readme" && readMe !== "" && <README readme={readMe} />}
+      {tabActive === "readme" && readMe !== "" && (
+        <README readme={readMe} radius={0} />
+      )}
+      {tabActive === "repo" && (
+        <FileList
+          listData={apiData}
+          id={JSON.parse(StorageData).login}
+          repoName={repoName}
+        />
+      )}
       {tabActive === "commit" && (
         <>
           <div>최근 100개 커밋</div>
