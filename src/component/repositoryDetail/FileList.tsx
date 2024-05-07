@@ -1,8 +1,8 @@
 // MODULE
+import { useEffect, useLayoutEffect, useState } from "react";
 import styled from "styled-components";
 // API
 import { exloerRepositoryListGET } from "../../api/github";
-import { useLayoutEffect, useState } from "react";
 // STYLED
 const ListBoxFrame = styled.div`
   border: 1px solid var(--light-gray);
@@ -36,12 +36,17 @@ type ItemMap = {
 };
 const FileList: React.FC<FileListProps> = ({ listData, id, repoName }) => {
   const [fileResult, setFileResult] = useState<object>([]);
+  const [requestUrl, setRequestUrl] = useState<string>("");
   const getDirectoryFileList = async (name: string) => {
-    // console.log(name);
     try {
-      const response = await exloerRepositoryListGET(id, repoName, name);
-      console.log(response);
-      setFileResult(response);
+      const response: any | object = await exloerRepositoryListGET(
+        id,
+        repoName,
+        name
+      );
+      console.log("결과", response);
+      setRequestUrl(`/${repoName}/${name}`);
+      setFileResult(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -50,8 +55,10 @@ const FileList: React.FC<FileListProps> = ({ listData, id, repoName }) => {
   useLayoutEffect(() => {
     setFileResult(listData);
   }, []);
+  useEffect(() => {}, [fileResult]);
   return (
     <ListBoxFrame>
+      <div className="request_name">{requestUrl}</div>
       <ul>
         {fileResult.map((item: ItemMap) => (
           <li

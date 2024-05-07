@@ -35,7 +35,7 @@ const AvatarBox = styled.div`
 const ResultItem: React.FC<Props> = ({ login, type, avatar, follower }) => {
   const navigate = useNavigate();
   const handleMoveMemberDetail = () => {
-    navigate("/detail", { state: { id: login } });
+    navigate(`/${login}`, { state: { id: login } });
     localStorage.removeItem("userData");
   };
   return (

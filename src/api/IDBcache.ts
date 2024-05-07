@@ -230,3 +230,7 @@ export const getRepositoryReadmeDataToIndexedDB = (
     };
   });
 };
+// CACHE SAVE REPOSITORY FILE LIST
+export const addRepositoryFileListDataToIndexedDB = () => {
+  return new Promise((resolve, reject) => {});
+};

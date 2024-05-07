@@ -7,6 +7,8 @@ interface CommonStore {
   setHeaderFixed: (headerFixed: boolean) => void;
   detailView: string;
   setDetailView: (detailView: "userInfo" | "repoInfo") => void;
+  tabActive: string;
+  setTabActive: (tabActive: string) => void;
 }
 
 export const commonStore = create<CommonStore>((set) => ({
@@ -16,4 +18,6 @@ export const commonStore = create<CommonStore>((set) => ({
   setHeaderFixed: (headerFixed: boolean) => set(() => ({ headerFixed })),
   detailView: "userInfo",
   setDetailView: (detailView: string) => set(() => ({ detailView })),
+  tabActive: "readme",
+  setTabActive: (tabActive: string) => set(() => ({ tabActive })),
 }));

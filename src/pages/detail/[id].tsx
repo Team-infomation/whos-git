@@ -1,6 +1,6 @@
 // MODULE
 import { useEffect, useLayoutEffect, useState } from "react";
-import { ScrollRestoration, useLocation } from "react-router-dom";
+import { ScrollRestoration, useLocation, useNavigate } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
 // ZUSTAND
@@ -10,7 +10,6 @@ import {
   memberInfoGET,
   memberRepoReadMeGET,
   memberRepositoryListGET,
-  memberRepositoryInfoGET,
 } from "../../api/github";
 import {
   addResultMemberDataToIndexedDB,
@@ -19,7 +18,6 @@ import {
 // COMPONENT
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
-import RepositoryDetail from "../../component/repositoryDetail";
 import Test from "../../component/chart/test/Test";
 // TYPE
 interface Props {
@@ -27,8 +25,6 @@ interface Props {
   public_repo: Repo | any;
   loginId: string;
   listRef: any;
-  setAPIData: (APIData: object) => void;
-  setRepoName: (repoName: string) => void;
 }
 interface Repo {
   id: number;
@@ -89,26 +85,8 @@ const RepositoryList: React.FC<Props> = ({
   public_repo,
   loginId,
   listRef,
-  setAPIData,
-  setRepoName,
 }) => {
-  const { setDetailView } = commonStore();
-
-  const handleChangeRepositoryDetail = async (repo: Repo) => {
-    try {
-      const response: any | Repo = await memberRepositoryInfoGET(
-        loginId,
-        repo.name
-      );
-      setAPIData(response?.data);
-      // console.log("저장소 상세정보", response);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setDetailView("repoInfo");
-      setRepoName(repo.name);
-    }
-  };
+  const navigate = useNavigate();
   return (
     <RepoBox>
       <h5>
@@ -120,7 +98,11 @@ const RepositoryList: React.FC<Props> = ({
           public_repo.map((repo: Repo) => (
             <li
               key={repo.id}
-              onClick={() => handleChangeRepositoryDetail(repo)}
+              onClick={() =>
+                navigate(`/${loginId}/${repo.name}`, {
+                  state: { loginId: loginId, repoName: repo.name },
+                })
+              }
             >
               <RepositoryItem repoData={repo} />
             </li>
@@ -240,71 +222,57 @@ const MemberDetail: React.FC<Props> = () => {
   }, []);
   return (
     <div className="con">
-      {detailView === "userInfo" ? (
-        <>
-          <div className="observer_box" ref={ref}>
-            {userData && profileRepo !== null && (
-              <UserDetailInfo
-                avatar={userData.avatar_url}
-                loginId={userData.login}
-                profileRepo={profileRepo}
-                bio={userData.bio}
+      <div className="observer_box" ref={ref}>
+        {userData && profileRepo !== null && (
+          <UserDetailInfo
+            avatar={userData.avatar_url}
+            loginId={userData.login}
+            profileRepo={profileRepo}
+            bio={userData.bio}
+          />
+        )}
+      </div>
+      <TabButton>
+        <ul className="flex flex_ai_c">
+          <li
+            id="repo"
+            className={`${
+              tabActive === "repo" && "active"
+            } flex flex_jc_c flex_ai_c cursor_p`}
+          >
+            <button onClick={() => handleTabmenuButton("repo")} value="repo">
+              Repository
+            </button>
+          </li>
+          <li
+            id="chart"
+            className={`${
+              tabActive === "chart" && "active"
+            } flex flex_jc_c flex_ai_c cursor_p`}
+          >
+            <button onClick={() => handleTabmenuButton("chart")} value="chart">
+              Chart
+            </button>
+          </li>
+        </ul>
+      </TabButton>
+      <div>
+        {tabActive === "repo" ? (
+          <>
+            <ScrollRestoration />
+            {publicRepo && userData && StorageData !== null && (
+              <RepositoryList
+                public_repo_count={userData?.public_repos}
+                public_repo={publicRepo}
+                loginId={JSON.parse(StorageData).login}
+                listRef={listRef}
               />
             )}
-          </div>
-          <TabButton>
-            <ul className="flex flex_ai_c">
-              <li
-                id="repo"
-                className={`${
-                  tabActive === "repo" && "active"
-                } flex flex_jc_c flex_ai_c cursor_p`}
-              >
-                <button
-                  onClick={() => handleTabmenuButton("repo")}
-                  value="repo"
-                >
-                  Repository
-                </button>
-              </li>
-              <li
-                id="chart"
-                className={`${
-                  tabActive === "chart" && "active"
-                } flex flex_jc_c flex_ai_c cursor_p`}
-              >
-                <button
-                  onClick={() => handleTabmenuButton("chart")}
-                  value="chart"
-                >
-                  Chart
-                </button>
-              </li>
-            </ul>
-          </TabButton>
-          <div>
-            {tabActive === "repo" ? (
-              <>
-                <ScrollRestoration />
-                {publicRepo && userData && StorageData !== null && (
-                  <RepositoryList
-                    public_repo_count={userData?.public_repos}
-                    public_repo={publicRepo}
-                    loginId={JSON.parse(StorageData).login}
-                    listRef={listRef}
-                    setAPIData={setAPIData}
-                    setRepoName={setRepoName}
-                  />
-                )}
-              </>
-            ) : (
-              <Test />
-            )}
-          </div>
-        </>
-      ) : (
-        <RepositoryDetail apiData={APIData} repoName={repoName} />
-      )}
+          </>
+        ) : (
+          <Test />
+        )}
+      </div>
     </div>
   );
 };

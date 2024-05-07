@@ -1,6 +1,7 @@
 // MODULE
 import { useState } from "react";
-import styled from "styled-components";
+// ZUSTAND
+import { commonStore } from "../../store/commonStore";
 // API
 import {
   memberRepoReadMeGET,
@@ -18,53 +19,11 @@ interface Props {
   apiData: object | any;
   repoName: string;
 }
-// STYLED
-const RepositoryNameBox = styled.div`
-  margin-top: 11rem;
-  h3 {
-    font-size: 2.4rem;
-    font-weight: 700;
-  }
-`;
-const TypeBox = styled.div`
-  width: 2rem;
-  height: 2rem;
-  margin-right: 1rem;
-  background: ${(props) => props.background};
-  border-radius: 50%;
-`;
-const TabButton = styled.div`
-  margin-top: 2.5rem;
-  li {
-    flex-basis: 13.5rem;
-    height: 3.5rem;
-    background: var(--gray);
-    border: 1px solid var(--light-gray);
-    border-bottom: none;
-    font-size: 2rem;
-    color: var(--white);
-    &:first-child {
-      border-top-left-radius: 0.5rem;
-    }
-    &:last-child {
-      margin-left: -1px;
-      border-top-right-radius: 0.5rem;
-    }
-    &.active {
-      background: var(--white);
-      color: var(--dark-gray);
-    }
-  }
-`;
 const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
-  const [tabActive, setTabActive] = useState<string>("readme");
+  const { tabActive } = commonStore();
   const [readMe, setReadMe] = useState<string>("");
 
   const StorageData: any | object = localStorage.getItem("userData");
-
-  const handleTabmenuButton = (value: string) => {
-    setTabActive(value);
-  };
 
   // API
   const getReadMe = async () => {
@@ -118,61 +77,7 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
   }
 
   return (
-    <div className="con">
-      <RepositoryNameBox className="flex flex_jc_s flex_ai_c">
-        <TypeBox background={"red"}></TypeBox>
-        <h3>{repoName}</h3>
-      </RepositoryNameBox>
-      <TabButton>
-        <ul className="flex flex_ai_c">
-          <li
-            id="readme"
-            className={`${
-              tabActive === "readme" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button
-              onClick={() => handleTabmenuButton("readme")}
-              value="readme"
-            >
-              README.md
-            </button>
-          </li>
-          <li
-            id="repo"
-            className={`${
-              tabActive === "repo" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button onClick={() => handleTabmenuButton("repo")} value="repo">
-              Repository
-            </button>
-          </li>
-          <li
-            id="chart"
-            className={`${
-              tabActive === "chart" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button onClick={() => handleTabmenuButton("chart")} value="chart">
-              Chart
-            </button>
-          </li>
-          <li
-            id="commit"
-            className={`${
-              tabActive === "commit" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button
-              onClick={() => handleTabmenuButton("commit")}
-              value="commit"
-            >
-              Commit
-            </button>
-          </li>
-        </ul>
-      </TabButton>
+    <>
       {tabActive === "readme" && readMe !== "" && (
         <README readme={readMe} radius={0} />
       )}
@@ -189,7 +94,7 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
           <button onClick={() => getCommitData()}>커밋 가져오기</button>
         </>
       )}
-    </div>
+    </>
   );
 };
 

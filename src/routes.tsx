@@ -3,7 +3,8 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "./pages/_layout";
 import Result from "./pages/result";
 import Home from "./pages/home";
-import MemberDetail from "./pages/detail";
+import MemberDetail from "./pages/detail/[id]";
+import RepositoryList from "./pages/repository/[id]";
 
 const router = createBrowserRouter([
   {
@@ -19,8 +20,12 @@ const router = createBrowserRouter([
         element: <Result />,
       },
       {
-        path: "/detail",
+        path: "/:login",
         element: <MemberDetail />,
+      },
+      {
+        path: "/:login/:repoName",
+        element: <RepositoryList />,
       },
     ],
   },
