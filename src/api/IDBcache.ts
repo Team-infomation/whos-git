@@ -1,3 +1,8 @@
+// TYPE
+type ResultType = {
+  repoName: string;
+  setTime: Date;
+};
 const idb = window.indexedDB;
 // ||
 // window.mozIndexedDB ||
@@ -90,7 +95,7 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
       // };
       member.onsuccess = (e: any | object) => {
         const result = e.target.result;
-        const currentTime: Date = new Date();
+        const currentTime: any | Date = new Date();
 
         const filteredByLogin = result.filter(
           (item: any) => item.memberId === login
@@ -198,18 +203,18 @@ export const getRepositoryReadmeDataToIndexedDB = (
 
       repoReadme.onsuccess = (e: any | object) => {
         const result = e.target.result;
-        const currentTime: Date = new Date();
+        const currentTime: any | Date = new Date();
 
         // const filterData = result.filter(
         //   (item: object) => item.repoName === repoName
         // );
 
-        const filterData = result.filter((item: object) => {
+        const filterData = result.filter((item: ResultType) => {
           if (!item.repoName) {
             return false;
           }
 
-          const itemDate = new Date(item.setTime);
+          const itemDate: any | Date = new Date(item.setTime);
           const differenceInDays = Math.abs(
             (currentTime - itemDate) / (1000 * 60 * 60 * 24)
           );
@@ -231,6 +236,40 @@ export const getRepositoryReadmeDataToIndexedDB = (
   });
 };
 // CACHE SAVE REPOSITORY FILE LIST
-export const addRepositoryFileListDataToIndexedDB = () => {
-  return new Promise((resolve, reject) => {});
+export const addRepositoryFileListDataToIndexedDB = (
+  loginId: string,
+  repoName: string,
+  repoResult: object
+) => {
+  return new Promise((resolve, reject) => {
+    const dbOpen = idb.open("whos_git", 1);
+
+    dbOpen.onsuccess = () => {
+      const db = dbOpen.result;
+      const transaction = db.transaction("repository", "readwrite");
+      const repositoryDB = transaction.objectStore("repository");
+      const repository = repositoryDB.put({
+        loginId: loginId,
+        repoName: repoName,
+        data: repoResult,
+        setTime: new Date(),
+      });
+
+      repository.onsuccess = (e) => {
+        transaction.oncomplete = () => {
+          db.close();
+        };
+        resolve(e);
+        console.log("repository", e);
+      };
+
+      repository.onerror = (e) => {
+        reject(e);
+        console.log("error", e);
+      };
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    };
+  });
 };
