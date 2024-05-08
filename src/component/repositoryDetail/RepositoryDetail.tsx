@@ -3,17 +3,13 @@ import { useState } from "react";
 // ZUSTAND
 import { commonStore } from "../../store/commonStore";
 // API
-import {
-  memberRepoReadMeGET,
-  memberRepositoryCommitGET,
-} from "../../api/github";
+import { memberRepoReadMeGET } from "../../api/github";
 import {
   addRepositoryReadmeDataToIndexedDB,
   getRepositoryReadmeDataToIndexedDB,
 } from "../../api/IDBcache";
 // COMPONENT
 import README from "../README";
-import FileList from "./FileList";
 // TYPE
 interface Props {
   apiData: object | any;
@@ -54,17 +50,6 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
       });
   };
 
-  const getCommitData = async () => {
-    try {
-      const response: any | object = await memberRepositoryCommitGET(
-        JSON.parse(StorageData).login,
-        repoName
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   let readmeElement;
   for (let i = 0; i < apiData.length; i++) {
     if (apiData[i].name === "README.md") {
@@ -75,27 +60,7 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
   if (readmeElement) {
     getReadMe();
   }
-
-  return (
-    <>
-      {tabActive === "readme" && readMe !== "" && (
-        <README readme={readMe} radius={0} />
-      )}
-      {tabActive === "repo" && (
-        <FileList
-          listData={apiData}
-          id={JSON.parse(StorageData).login}
-          repoName={repoName}
-        />
-      )}
-      {tabActive === "commit" && (
-        <>
-          <div>최근 100개 커밋</div>
-          <button onClick={() => getCommitData()}>커밋 가져오기</button>
-        </>
-      )}
-    </>
-  );
+  return readMe !== "" && <README readme={readMe} radius={0} />;
 };
 
 export default RepositoryDetail;

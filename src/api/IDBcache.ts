@@ -40,6 +40,7 @@ export const addKeywordToIndexedDB = (getKeyword: string) => {
 // CACHE SAVE MEMBER INFO
 export const addResultMemberDataToIndexedDB = (
   resultData: object,
+  readmeData: string,
   setTime: Date,
   login: string
 ) => {
@@ -52,6 +53,7 @@ export const addResultMemberDataToIndexedDB = (
 
       const setMemberData = memberResultDB.put({
         memberResult: resultData,
+        readmeData: readmeData,
         setTime: setTime,
         memberId: login,
       });
@@ -85,14 +87,6 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
       const memberDB = transaction.objectStore("member");
       const member = memberDB.getAll();
 
-      // member.onsuccess = (e: any | object) => {
-      //   const result = e.target.result;
-      //   const checkDB = result.filter(
-      //     (result: any) => result.memberId === login
-      //   );
-      //   resolve(result.filter((result: any) => result.memberId === login));
-      //   console.log("check", checkDB);
-      // };
       member.onsuccess = (e: any | object) => {
         const result = e.target.result;
         const currentTime: any | Date = new Date();
@@ -250,9 +244,13 @@ export const addRepositoryFileListDataToIndexedDB = (
       const repositoryDB = transaction.objectStore("repository");
       const repository = repositoryDB.put({
         loginId: loginId,
-        repoName: repoName,
-        data: repoResult,
-        setTime: new Date(),
+        repositoryList: [
+          {
+            repoName: repoName,
+            data: repoResult,
+            setTime: new Date(),
+          },
+        ],
       });
 
       repository.onsuccess = (e) => {

@@ -120,7 +120,7 @@ const MemberDetail: React.FC<Props> = () => {
   const { setHeaderFixed, detailView, setDetailView } = commonStore();
 
   const [userData, setUserData] = useState<Repo | null>(null);
-  const [profileRepo, setProfileRepo] = useState<string | null>(null);
+  const [profileRepo, setProfileRepo] = useState<string>("");
   const [publicRepo, setPublicRepo] = useState<unknown | object>(null);
   const [APIData, setAPIData] = useState<unknown | object>([]);
   const [page, setPage] = useState<number>(1);
@@ -133,23 +133,12 @@ const MemberDetail: React.FC<Props> = () => {
   const MaxPage: number =
     userData !== null ? Math.ceil(userData.public_repos / 30) : 0;
 
-  const handleTabmenuButton = (value: string) => {
+  const handleTabMenuButton = (value: string) => {
     setTabActive(value);
   };
-  const getMemberProfileREADME = async () => {
-    try {
-      const response: any | Repo = await memberRepoReadMeGET(
-        state.id,
-        state.id
-      );
-      setProfileRepo(response?.data.content);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+
   const getMemberInfo = async () => {
     const setTime = new Date();
-
     const getIndexedDB: any | Repo = await getResultMemberDataToIndexedDB(
       state.id
     );
@@ -157,15 +146,22 @@ const MemberDetail: React.FC<Props> = () => {
     if (Array.isArray(getIndexedDB) && getIndexedDB.length === 0) {
       try {
         const response: any | Repo = await memberInfoGET(state.id);
-        console.log("api data", response?.data);
         setUserData(response?.data);
+        const responseReadme: any | Repo = await memberRepoReadMeGET(
+          state.id,
+          state.id
+        );
+        setProfileRepo(responseReadme?.data.content);
         localStorage.setItem("userData", JSON.stringify(response?.data));
         getCurrentUserRepoList(response?.data.repos_url, page);
-        await addResultMemberDataToIndexedDB(response?.data, setTime, state.id);
+        await addResultMemberDataToIndexedDB(
+          response?.data,
+          responseReadme?.data.content,
+          setTime,
+          state.id
+        );
       } catch (error) {
         console.log(error);
-      } finally {
-        console.log("finally");
       }
     } else {
       setUserData(getIndexedDB[0].memberResult);
@@ -174,6 +170,7 @@ const MemberDetail: React.FC<Props> = () => {
         JSON.stringify(getIndexedDB[0].memberResult)
       );
       getCurrentUserRepoList(getIndexedDB[0].memberResult.repos_url, page);
+      setProfileRepo(getIndexedDB[0].readmeData);
     }
   };
   const getCurrentUserRepoList = async (url: string, page: number) => {
@@ -194,7 +191,6 @@ const MemberDetail: React.FC<Props> = () => {
       setUserData(JSON.parse(StorageData));
       getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
     }
-    getMemberProfileREADME();
   }, []);
 
   useEffect(() => {
@@ -220,10 +216,11 @@ const MemberDetail: React.FC<Props> = () => {
   useEffect(() => {
     getResultMemberDataToIndexedDB(state.id);
   }, []);
+
   return (
     <div className="con">
       <div className="observer_box" ref={ref}>
-        {userData && profileRepo !== null && (
+        {userData !== null && (
           <UserDetailInfo
             avatar={userData.avatar_url}
             loginId={userData.login}
@@ -240,7 +237,7 @@ const MemberDetail: React.FC<Props> = () => {
               tabActive === "repo" && "active"
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
-            <button onClick={() => handleTabmenuButton("repo")} value="repo">
+            <button onClick={() => handleTabMenuButton("repo")} value="repo">
               Repository
             </button>
           </li>
@@ -250,7 +247,7 @@ const MemberDetail: React.FC<Props> = () => {
               tabActive === "chart" && "active"
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
-            <button onClick={() => handleTabmenuButton("chart")} value="chart">
+            <button onClick={() => handleTabMenuButton("chart")} value="chart">
               Chart
             </button>
           </li>

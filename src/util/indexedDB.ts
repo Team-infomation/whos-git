@@ -1,3 +1,4 @@
+import { easeBack } from "d3";
 import { openDB } from "idb";
 
 export const indexedDBStart = () => {
@@ -6,25 +7,23 @@ export const indexedDBStart = () => {
   const request = indexedDB.open(dbName, 1);
 
   const deleteOldData = () => {
-    const oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
+    const oneDay = 24 * 60 * 60 * 1000;
     const yesterday = Date.now() - oneDay;
 
-    // Open the database for read/write access
     const dbPromise = request.result;
-    dbPromise.then((db) => {
-      const transaction = db.transaction(["keyword", "searchResult", "..."]); // Include all stores containing data to check
+    dbPromise.then((db: any) => {
+      const transaction = db.transaction(["keyword", "searchResult", "..."]);
 
-      transaction.onerror = (event) => {
-        console.error("Error deleting old data:", event.target.error);
+      transaction.onerror = (e: any) => {
+        console.error("Error deleting old data:", e.target.error);
       };
 
-      // Loop through each object store
       for (const storeName of transaction.objectStoreNames) {
         const store = transaction.objectStore(storeName);
-        const index = store.index("timestamp"); // Assuming you have an index on "timestamp" property
+        const index = store.index("timestamp");
 
-        index.openCursor(yesterday, null).onsuccess = (event) => {
-          const cursor = event.target.result;
+        index.openCursor(yesterday, null).onsuccess = (e: any) => {
+          const cursor = e.target.result;
           if (cursor) {
             store.delete(cursor.key);
             cursor.continue();
@@ -36,15 +35,15 @@ export const indexedDBStart = () => {
     });
   };
 
-  // Set interval to check for old data every hour (adjust as needed)
   const checkInterval = setInterval(deleteOldData, 60 * 60 * 1000);
 
-  request.onupgradeneeded = (event) => {
-    // ... rest of the code for creating object stores ...
+  request.onupgradeneeded = (e) => {
+    console.log("check data", e);
+    console.log("checkInterval", checkInterval);
   };
 
-  request.onupgradeneeded = (event: any) => {
-    const db = event.target.result;
+  request.onupgradeneeded = (e: any) => {
+    const db = e.target.result;
     const keywordStore = db.createObjectStore("keyword", {
       keyPath: "id",
       autoIncrement: true,
@@ -77,5 +76,6 @@ export const indexedDBStart = () => {
   };
   request.onerror = (e: any) => {
     console.error("Error opening database:", e.target.error);
+    window.location.href = "/";
   };
 };

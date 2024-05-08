@@ -6,8 +6,8 @@ import styled from "styled-components";
 import { commonStore } from "../../store/commonStore";
 // API
 import {
-  memberRepositoryListGET,
   memberRepositoryInfoGET,
+  memberRepositoryCommitGET,
 } from "../../api/github";
 // STYLED
 const RepositoryNameBox = styled.div`
@@ -21,7 +21,7 @@ const TypeBox = styled.div`
   width: 2rem;
   height: 2rem;
   margin-right: 1rem;
-  background: ${(props) => props.background};
+  background: ${(props: any) => props.background};
   border-radius: 50%;
 `;
 const TabButton = styled.div`
@@ -49,6 +49,7 @@ const TabButton = styled.div`
 `;
 // COMPONENT
 import RepositoryDetail from "../../component/repositoryDetail";
+import FileList from "../../component/repositoryDetail/FileList";
 // TYPE
 interface Repo {
   id: number;
@@ -68,6 +69,7 @@ const RepositoryList: React.FC<Repo> = () => {
   const { state } = useLocation();
   const { tabActive, setTabActive } = commonStore();
 
+  const StorageData: any | object = localStorage.getItem("userData");
   const loginId =
     state !== null ? state.loginId : location.pathname.split("/").slice(1)[0];
   const resultRepoName =
@@ -78,6 +80,18 @@ const RepositoryList: React.FC<Repo> = () => {
   const handleTabmenuButton = (value: string) => {
     setTabActive(value);
   };
+
+  const getCommitData = async () => {
+    try {
+      const response: any | object = await memberRepositoryCommitGET(
+        JSON.parse(StorageData).login,
+        repoName
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleChangeRepositoryDetail = async () => {
     try {
       const response: any | Repo = await memberRepositoryInfoGET(
@@ -161,8 +175,18 @@ const RepositoryList: React.FC<Repo> = () => {
           </li>
         </ul>
       </TabButton>
-      <RepositoryDetail apiData={APIData} repoName={resultRepoName} />
-      {/* <FileList listData={APIData} id={loginId} repoName={resultRepoName} /> */}
+      {tabActive === "readme" && (
+        <RepositoryDetail apiData={APIData} repoName={resultRepoName} />
+      )}
+      {tabActive === "repo" && (
+        <FileList listData={APIData} id={loginId} repoName={resultRepoName} />
+      )}
+      {tabActive === "commit" && (
+        <>
+          <div>최근 100개 커밋</div>
+          <button onClick={() => getCommitData()}>커밋 가져오기</button>
+        </>
+      )}
     </div>
   );
 };
