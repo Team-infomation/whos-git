@@ -4,11 +4,6 @@ type ResultType = {
   setTime: Date;
 };
 const idb = window.indexedDB;
-// ||
-// window.mozIndexedDB ||
-// window.webkitIndexedDB ||
-// window.msIndexedDB ||
-// window.shimIndexedDB;
 
 // CACHE SAVE KEYWORD
 export const addKeywordToIndexedDB = (getKeyword: string) => {
@@ -198,10 +193,6 @@ export const getRepositoryReadmeDataToIndexedDB = (
       repoReadme.onsuccess = (e: any | object) => {
         const result = e.target.result;
         const currentTime: any | Date = new Date();
-
-        // const filterData = result.filter(
-        //   (item: object) => item.repoName === repoName
-        // );
 
         const filterData = result.filter((item: ResultType) => {
           if (!item.repoName) {

@@ -177,7 +177,6 @@ const MemberDetail: React.FC<Props> = () => {
     try {
       const response: any | Repo = await memberRepositoryListGET(url, page);
       setPublicRepo(response?.data);
-      console.log(response.data);
     } catch (error) {
       console.log(error);
     }

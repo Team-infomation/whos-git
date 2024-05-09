@@ -1,6 +1,6 @@
 // import axios from "../util/instance";
 import axios from "axios";
-// import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const url = "https://api.github.com/";
 const token = import.meta.env.VITE_APP_GITHUB_TOKEN;
@@ -85,7 +85,7 @@ export const memberRepositoryInfoGET = (loginId: string, repoName: string) => {
   });
 };
 // EXPLOER REPOSITORY FILE AND DIRECTORY DETAIL
-export const exloerRepositoryListGET = (
+export const explorerRepositoryListGET = (
   loginId: string,
   repoName: string,
   dirName: string
@@ -97,6 +97,7 @@ export const exloerRepositoryListGET = (
       })
       .then((response) => {
         resolve(response);
+        console.log(response);
       })
       .catch((error) => {
         reject(error);

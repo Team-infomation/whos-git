@@ -2,8 +2,9 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import styled from "styled-components";
 // API
-import { exloerRepositoryListGET } from "../../api/github";
+import { explorerRepositoryListGET } from "../../api/github";
 import { addRepositoryFileListDataToIndexedDB } from "../../api/IDBcache";
+import FetchRepositoryData from "./FetchRepositoryList";
 // STYLED
 const ListBoxFrame = styled.div`
   border: 1px solid var(--light-gray);
@@ -35,36 +36,61 @@ type ItemMap = {
   name: string;
   type: string;
 };
+
 const FileList: React.FC<FileListProps> = ({ listData, id, repoName }) => {
   const [fileResult, setFileResult] = useState<object>([]);
   const [requestUrl, setRequestUrl] = useState<string>("");
-  const getDirectoryFileList = async (name: string) => {
+  const getDirectoryFileList = async (requestUrl: string, name: string) => {
     try {
-      const response: any | object = await exloerRepositoryListGET(
+      const directoryName = requestUrl === "" ? name : `${requestUrl}/${name}`;
+      const response: any | object = await explorerRepositoryListGET(
         id,
         repoName,
-        name
+        directoryName
       );
       console.log("결과", response);
-      setRequestUrl(`/${repoName}/${name}`);
+      const prevData = {
+        id: id,
+        repoName: repoName,
+        name: name,
+      };
+      localStorage.setItem("prevList", JSON.stringify(directoryName));
+      setRequestUrl(directoryName);
       setFileResult(response.data);
-      addRepositoryFileListDataToIndexedDB(id, repoName, response.data);
+      // addRepositoryFileListDataToIndexedDB(id, repoName, response.data);
     } catch (error) {
       console.log(error);
     }
   };
+
   useLayoutEffect(() => {
     setFileResult(listData);
   }, []);
-  useEffect(() => {}, [fileResult]);
+  useEffect(() => {
+    console.log(fileResult);
+  }, [fileResult]);
+
+  // const fetchGroups = (): Promise<Group[]> =>
+  //   axios
+  //     .get("https://api.github.com/repos/kkt9102/isotope/contents/bin")
+  //     .then((response) => response.data);
+
+  // const { data } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
   return (
     <ListBoxFrame>
-      <div className="request_name">{requestUrl}</div>
+      <div
+        className="request_name"
+        onClick={() =>
+          requestUrl === "" ? null : getDirectoryFileList(requestUrl)
+        }
+      >
+        {requestUrl === "" ? repoName : requestUrl}
+      </div>
       <ul>
         {fileResult.length > 0 &&
           fileResult.map((item: ItemMap) => (
             <li
-              onClick={() => getDirectoryFileList(item.name)}
+              onClick={() => getDirectoryFileList(requestUrl, item.name)}
               className="flex flex_jc_s flex_ai_c cursor_p"
               key={item.name}
             >
