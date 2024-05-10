@@ -2,10 +2,13 @@
 
 :root {
   --black: #222222;
-  --depp-gray: #444444;
+  --deep-gray: #444444;
   --gray: #666666;
   --light-gray: #999999;
   --white: #ffffff;
+  --deep-blue: #003f65;
+  --blue: #0064a2;
+  --light-blue: #0587d7;
 }
 .con {
   max-width: 100rem;

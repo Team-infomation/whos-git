@@ -47,9 +47,11 @@ export const memberRepoReadMeGET = (
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {
+        console.log(response);
         resolve(response);
       })
       .catch((error) => {
+        console.log(error);
         reject(error);
       });
   });
@@ -107,11 +109,12 @@ export const explorerRepositoryListGET = (
 // REPOSITORY COMMIT
 export const memberRepositoryCommitGET = (
   loginId: string,
-  repoName: string
+  repoName: string,
+  page: number
 ) => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url}repos/${loginId}/${repoName}/commits`, {
+      .get(`${url}repos/${loginId}/${repoName}/commits?page=${page}`, {
         headers: { Authorization: `token ${token}` },
       })
       .then((response) => {

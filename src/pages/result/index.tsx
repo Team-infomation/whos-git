@@ -10,17 +10,43 @@ import { searchStore } from "../../store/searchStore";
 // COMPONENT
 import ResultItem from "../../component/resultItem";
 // TYPE
-interface Props {
+type Props = {
   item: Repo;
-}
-interface Repo {
+  items: Repo;
+  data: ResultProps;
+};
+type ResultProps = {
+  avatar_url: string;
+  events_url: string;
+  followers_url: string;
+  following_url: string;
+  gists_url: string;
+  gravatar_id: string;
+  html_url: string;
+  id: number;
+  login: string;
+  node_id: string;
+  organizations_url: string;
+  received_events_url: string;
+  repos_url: string;
+  score: number;
+  site_admin: boolean;
+  starred_url: string;
+  subscriptions_url: string;
+  type: string;
+  url: string;
+  total_count: number;
+  items: any;
+};
+type Repo = {
   length: number;
   login: string;
   id: number;
   type: string;
   avatar_url: string;
   followers_url: string;
-}
+};
+
 // STYLED
 const ResultSection = styled.div`
   margin-top: 12rem;
@@ -36,9 +62,9 @@ const ResultSection = styled.div`
 const Result: React.FC<Props> = () => {
   const { searchResult, page, setPage, keyword } = searchStore();
   const { state } = useLocation();
-  const totalCount: number = searchResult.total_count;
-  const resultObject = searchResult.items;
-  const MaxPage = Math.ceil(totalCount / 30);
+  const totalCount = searchResult?.total_count;
+  const resultObject = searchResult?.items;
+  const MaxPage: number = Math.ceil(totalCount / 30);
 
   const [data, setData] = useState<Repo | null>(null);
   const [listRef, listInView] = useInView();
@@ -46,11 +72,12 @@ const Result: React.FC<Props> = () => {
     const nextPage = page + 1;
     const scrollSearchMember = async (nextPage: number) => {
       try {
-        const response: unknown | object = await memberSearchGET(
+        const response: ResultProps | unknown = await memberSearchGET(
           keyword,
           nextPage
         );
-        setData((prevData: any) => [...prevData, ...response?.data.items]);
+        console.log("response", response);
+        setData((prevData) => [...prevData, ...response?.data.items]);
       } catch (error) {
         console.log(error);
       }

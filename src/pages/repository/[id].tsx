@@ -1,14 +1,11 @@
 // MODULE
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 // ZUSTAND
 import { commonStore } from "../../store/commonStore";
 // API
-import {
-  memberRepositoryInfoGET,
-  memberRepositoryCommitGET,
-} from "../../api/github";
+import { memberRepositoryInfoGET } from "../../api/github";
 // STYLED
 const RepositoryNameBox = styled.div`
   margin-top: 11rem;
@@ -50,6 +47,7 @@ const TabButton = styled.div`
 // COMPONENT
 import RepositoryDetail from "../../component/repositoryDetail";
 import FileList from "../../component/repositoryDetail/FileList";
+import Commit from "../../component/repositoryDetail/Commit";
 // TYPE
 interface Repo {
   id: number;
@@ -67,9 +65,8 @@ interface Repo {
 const RepositoryList: React.FC<Repo> = () => {
   const location = useLocation();
   const { state } = useLocation();
-  const { tabActive, setTabActive } = commonStore();
+  const { tabActive, setTabActive, setHeaderFixed } = commonStore();
 
-  const StorageData: any | object = localStorage.getItem("userData");
   const loginId =
     state !== null ? state.loginId : location.pathname.split("/").slice(1)[0];
   const resultRepoName =
@@ -77,19 +74,8 @@ const RepositoryList: React.FC<Repo> = () => {
   const [APIData, setAPIData] = useState<unknown | object>([]);
   const [repoName, setRepoName] = useState<string>("");
 
-  const handleTabmenuButton = (value: string) => {
+  const handleTabMenuButton = (value: string) => {
     setTabActive(value);
-  };
-
-  const getCommitData = async () => {
-    try {
-      const response: any | object = await memberRepositoryCommitGET(
-        JSON.parse(StorageData).login,
-        repoName
-      );
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const handleChangeRepositoryDetail = async () => {
@@ -109,6 +95,10 @@ const RepositoryList: React.FC<Repo> = () => {
   useEffect(() => {
     handleChangeRepositoryDetail();
   }, []);
+  useLayoutEffect(() => {
+    setTabActive("readme");
+    setHeaderFixed(true);
+  }, []);
   return (
     <div className="con">
       <RepositoryNameBox className="flex flex_jc_s flex_ai_c">
@@ -124,7 +114,7 @@ const RepositoryList: React.FC<Repo> = () => {
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
             <button
-              onClick={() => handleTabmenuButton("readme")}
+              onClick={() => handleTabMenuButton("readme")}
               value="readme"
               className="flex flex_jc_c flex_ai_c"
             >
@@ -138,7 +128,7 @@ const RepositoryList: React.FC<Repo> = () => {
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
             <button
-              onClick={() => handleTabmenuButton("repo")}
+              onClick={() => handleTabMenuButton("repo")}
               value="repo"
               className="flex flex_jc_c flex_ai_c"
             >
@@ -152,7 +142,7 @@ const RepositoryList: React.FC<Repo> = () => {
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
             <button
-              onClick={() => handleTabmenuButton("chart")}
+              onClick={() => handleTabMenuButton("chart")}
               value="chart"
               className="flex flex_jc_c flex_ai_c"
             >
@@ -166,7 +156,7 @@ const RepositoryList: React.FC<Repo> = () => {
             } flex flex_jc_c flex_ai_c cursor_p`}
           >
             <button
-              onClick={() => handleTabmenuButton("commit")}
+              onClick={() => handleTabMenuButton("commit")}
               value="commit"
               className="flex flex_jc_c flex_ai_c"
             >
@@ -182,10 +172,7 @@ const RepositoryList: React.FC<Repo> = () => {
         <FileList listData={APIData} id={loginId} repoName={resultRepoName} />
       )}
       {tabActive === "commit" && (
-        <>
-          <div>최근 100개 커밋</div>
-          <button onClick={() => getCommitData()}>커밋 가져오기</button>
-        </>
+        <Commit id={loginId} repoName={resultRepoName} />
       )}
     </div>
   );

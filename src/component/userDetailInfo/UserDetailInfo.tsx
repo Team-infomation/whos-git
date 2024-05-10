@@ -38,7 +38,7 @@ const UserDetailInfo: React.FC<Props> = ({
       {profileRepo === null ? (
         <BioBox>{bio !== null ? bio : ""}</BioBox>
       ) : (
-        <README readme={profileRepo} />
+        <README readme={profileRepo} radius={"0.5rem"} />
       )}
     </>
   );

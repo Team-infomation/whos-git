@@ -119,10 +119,10 @@ const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
   const { setHeaderFixed, detailView, setDetailView } = commonStore();
 
-  const [userData, setUserData] = useState<Repo | null>(null);
+  const [userData, setUserData] = useState<Repo | any>(null);
   const [profileRepo, setProfileRepo] = useState<string>("");
   const [publicRepo, setPublicRepo] = useState<unknown | object>(null);
-  const [APIData, setAPIData] = useState<unknown | object>([]);
+  const [APIData, setAPIData] = useState<object | any[]>([]);
   const [page, setPage] = useState<number>(1);
   const [tabActive, setTabActive] = useState<string>("repo");
   const [repoName, setRepoName] = useState<string>("");
@@ -142,26 +142,27 @@ const MemberDetail: React.FC<Props> = () => {
     const getIndexedDB: any | Repo = await getResultMemberDataToIndexedDB(
       state.id
     );
-
     if (Array.isArray(getIndexedDB) && getIndexedDB.length === 0) {
       try {
         const response: any | Repo = await memberInfoGET(state.id);
         setUserData(response?.data);
+
+        localStorage.setItem("userData", JSON.stringify(response?.data));
+        getCurrentUserRepoList(response?.data.repos_url, page);
+      } catch (error) {
+        console.log(error);
+      } finally {
         const responseReadme: any | Repo = await memberRepoReadMeGET(
           state.id,
           state.id
         );
         setProfileRepo(responseReadme?.data.content);
-        localStorage.setItem("userData", JSON.stringify(response?.data));
-        getCurrentUserRepoList(response?.data.repos_url, page);
         await addResultMemberDataToIndexedDB(
-          response?.data,
+          userData,
           responseReadme?.data.content,
           setTime,
           state.id
         );
-      } catch (error) {
-        console.log(error);
       }
     } else {
       setUserData(getIndexedDB[0].memberResult);
