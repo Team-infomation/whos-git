@@ -64,32 +64,32 @@ type ItemMap = {
 const SortType = [
   {
     value: "type_asc",
-    name: "타입별",
+    name: "타입별 ⬆️",
     icon: "xi-sort-asc",
   },
   {
     value: "type_desc",
-    name: "타입별",
+    name: "타입별 ⬇️",
     icon: "xi-sort-desc",
   },
   {
     value: "name_asc",
-    name: "파일명",
+    name: "파일명 ⬆️",
     icon: "xi-sort-asc",
   },
   {
     value: "name_desc",
-    name: "파일명",
+    name: "파일명 ⬇️",
     icon: "xi-sort-desc",
   },
   {
     value: "size_asc",
-    name: "크기별",
+    name: "크기별 ⬆️",
     icon: "xi-sort-asc",
   },
   {
     value: "size_desc",
-    name: "크기별",
+    name: "크기별 ⬇️",
     icon: "xi-sort-desc",
   },
 ];

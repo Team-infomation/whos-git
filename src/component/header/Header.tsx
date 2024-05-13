@@ -125,23 +125,25 @@ const Header: React.FC<Props> = () => {
             <img src={Logo} alt="" loading="lazy" width={50} height={50} />
           </li>
           <li className={`member_info flex flex_jc_c flex_ai_c`}>
-            {StorageData !== null && StorageData !== "undefined" && (
-              <>
-                <AvatarBox>
-                  <img
-                    src={JSON.parse(StorageData).avatar_url}
-                    alt=""
-                    loading="lazy"
-                    width={50}
-                    height={50}
-                  />
-                </AvatarBox>
-                <p>
-                  <span>{JSON.parse(StorageData).login}</span>님의 github 정보
-                  보는중
-                </p>
-              </>
-            )}
+            {StorageData !== null &&
+              StorageData !== "null" &&
+              StorageData !== "undefined" && (
+                <>
+                  <AvatarBox>
+                    <img
+                      src={JSON.parse(StorageData).avatar_url}
+                      alt=""
+                      loading="lazy"
+                      width={50}
+                      height={50}
+                    />
+                  </AvatarBox>
+                  <p>
+                    <span>{JSON.parse(StorageData).login}</span>님의 github 정보
+                    보는중
+                  </p>
+                </>
+              )}
           </li>
           <li className={`search_input flex flex_ai_c`}>
             <label htmlFor="keyword"></label>

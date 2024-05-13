@@ -4,49 +4,41 @@ import { useQuery } from "@tanstack/react-query";
 // API
 import { memberRepositoryCommitGET } from "../../api/github";
 import { useEffect, useState } from "react";
+// UTIL
+import { DateFormChange } from "../../util/UnitCalculator";
+import { Link } from "react-router-dom";
 // STYLED
 const ListBoxFrame = styled.div`
   border: 1px solid var(--light-gray);
-  .request_name {
-    padding-left: 0.5rem;
-    i {
-      margin-right: 1rem;
-      font-size: 2.5rem;
+`;
+const ListBox = styled.li`
+  padding: 1rem;
+  border-bottom: 1px solid var(--light-gray);
+  > div {
+    flex-grow: 1;
+    .message {
+      font-size: 1.8rem;
+      font-weight: 600;
     }
-    border-bottom: 1px solid var(--light-gray);
-    li {
-      padding: 0.5rem 0;
-      border-bottom: none !important;
-      font-size: 2rem;
-      &:hover {
-        font-weight: inherit;
-      }
-      button {
-        color: var(--blue);
-        &:hover {
-          font-weight: 600;
-        }
-      }
+    .push_id {
+      flex-basis: 25%;
     }
   }
-  ul {
-    li {
-      padding: 0.5rem;
-      font-weight: 500;
-      transition: all 0.3s;
-      &:not(:last-child) {
-        border-bottom: 1px solid var(--light-gray);
-      }
-      &:hover {
-        font-weight: 600;
-      }
-      i {
-        margin-right: 1rem;
-        font-size: 1.8rem;
-      }
-    }
+  a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-basis: 12rem;
+    height: 2.5rem;
+    margin-left: 2rem;
+    background: #314d76;
+    border-radius: 0.5rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--white);
   }
 `;
+
 // TYPE
 type CommitTypes = {
   id: string;
@@ -65,11 +57,54 @@ const useGetRepositoryCommitList = (
     staleTime: 1000 * 60 * 60,
   });
 };
+const ResultItem: React.FC = ({ data }) => {
+  return (
+    <ul>
+      {data !== undefined &&
+        data.map((item: any | object[]) => (
+          <ListBox
+            key={item.commit.author.date}
+            className="flex flex_jc_sb flex_ai_c"
+          >
+            <div className="flex flex_jc_s flex_ai_c flex_wrap_wrap">
+              <div className="message width_100p flex flex_ai_c">
+                <p>Message : </p>
+                {item.commit.message}
+              </div>
+              <div className="push_id flex flex_ai_c">
+                <p>User : </p>
+                {item.commit.author.name}
+              </div>
+              <div className="commit_dt flex flex_ai_c">
+                <p>Date : </p>
+                {DateFormChange(item.commit.author.date)}
+              </div>
+            </div>
+            <Link
+              to={item.html_url}
+              target="_blank"
+              className="flex flex_jc_c flex_ai_c"
+            >
+              github로 이동
+            </Link>
+          </ListBox>
+        ))}
+    </ul>
+  );
+};
+
 const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
   const StorageData: any | object = localStorage.getItem("userData");
 
+  const [commitData, setCommitData] = useState<object[]>([]);
   const [page, setPage] = useState<number>(1);
 
+  const { isLoading, error, data }: any = useGetRepositoryCommitList(
+    id,
+    repoName,
+    page
+  );
+  console.log(isLoading, error, data);
   const getCommitData = async () => {
     try {
       const response: any | object = await memberRepositoryCommitGET(
@@ -83,11 +118,15 @@ const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
     }
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    setCommitData(data?.data);
+  }, [data]);
+  console.log("commitData", commitData);
   return (
     <ListBoxFrame>
-      <div>최근 100개 커밋</div>
+      <div>Commit History</div>
       <button onClick={() => getCommitData()}>커밋 가져오기</button>
+      <ResultItem data={commitData} />
     </ListBoxFrame>
   );
 };
