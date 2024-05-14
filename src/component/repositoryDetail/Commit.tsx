@@ -1,6 +1,7 @@
 // MODULE
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
-import { useQuery } from "@tanstack/react-query";
 // API
 import { memberRepositoryCommitGET } from "../../api/github";
 import { useEffect, useState } from "react";
@@ -17,11 +18,22 @@ const ListBox = styled.li`
   > div {
     flex-grow: 1;
     .message {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 600;
     }
     .push_id {
       flex-basis: 25%;
+      font-weight: 700;
+      p {
+        font-size: 1.4rem;
+      }
+    }
+    .commit_dt {
+      font-weight: 700;
+      color: var(--light-gray);
+      p {
+        font-size: 1.4rem;
+      }
     }
   }
   a {
@@ -44,6 +56,7 @@ type CommitTypes = {
   id: string;
   repoName: string;
   page: number;
+  listRef: any;
 };
 
 const useGetRepositoryCommitList = (
@@ -51,33 +64,37 @@ const useGetRepositoryCommitList = (
   repoName: string,
   page: number
 ) => {
-  return useQuery({
-    queryKey: ["commit-history", id, repoName, page],
-    queryFn: () => memberRepositoryCommitGET(id, repoName, page),
-    staleTime: 1000 * 60 * 60,
+  return useInfiniteQuery({
+    queryKey: ["commit-history", id, repoName],
+    queryFn: ({ pageParam = 1 }) =>
+      memberRepositoryCommitGET(id, repoName, pageParam),
+    initialSize: 1,
+    getNextPageParam: ({ data }) => {
+      const { next_page } = data;
+      // Check if there are more pages and limit to 5 pages
+      return next_page && page < 5 ? next_page : undefined;
+    },
   });
 };
-const ResultItem: React.FC = ({ data }) => {
+const ResultItem: React.FC = ({ data, listRef }) => {
   return (
     <ul>
       {data !== undefined &&
-        data.map((item: any | object[]) => (
-          <ListBox
-            key={item.commit.author.date}
-            className="flex flex_jc_sb flex_ai_c"
-          >
+        data.map((item: any | object[], index: number) => (
+          <ListBox key={index} className="flex flex_jc_sb flex_ai_c">
             <div className="flex flex_jc_s flex_ai_c flex_wrap_wrap">
               <div className="message width_100p flex flex_ai_c">
-                <p>Message : </p>
-                {item.commit.message}
+                <p>
+                  {index} : {item.commit.message}
+                </p>
               </div>
               <div className="push_id flex flex_ai_c">
-                <p>User : </p>
-                {item.commit.author.name}
+                <p>User :&ensp;</p>
+                <p> {item.commit.author.name}</p>
               </div>
               <div className="commit_dt flex flex_ai_c">
-                <p>Date : </p>
-                {DateFormChange(item.commit.author.date)}
+                <p>Date :&ensp;</p>
+                <p> {DateFormChange(item.commit.author.date)}</p>
               </div>
             </div>
             <Link
@@ -89,6 +106,7 @@ const ResultItem: React.FC = ({ data }) => {
             </Link>
           </ListBox>
         ))}
+      {data !== undefined && data?.length > 29 && <li ref={listRef}></li>}
     </ul>
   );
 };
@@ -98,13 +116,14 @@ const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
 
   const [commitData, setCommitData] = useState<object[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [listRef, listInView] = useInView();
 
-  const { isLoading, error, data }: any = useGetRepositoryCommitList(
+  const { data, isFetching }: any = useGetRepositoryCommitList(
     id,
     repoName,
     page
   );
-  console.log(isLoading, error, data);
+  console.log("data", isFetching);
   const getCommitData = async () => {
     try {
       const response: any | object = await memberRepositoryCommitGET(
@@ -119,14 +138,23 @@ const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
   };
 
   useEffect(() => {
-    setCommitData(data?.data);
-  }, [data]);
-  console.log("commitData", commitData);
+    setCommitData(data?.pages[0].data);
+    if (listInView && page <= 5) {
+      if (data?.pages[0].data.length === 0) {
+        console.log("값 없음");
+      } else {
+        console.log(page);
+        setPage(page + 1);
+        // setCommitData((prevData) => [...prevData, ...data?.data]);
+      }
+    }
+  }, [listInView, page, data]);
+
   return (
     <ListBoxFrame>
       <div>Commit History</div>
       <button onClick={() => getCommitData()}>커밋 가져오기</button>
-      <ResultItem data={commitData} />
+      <ResultItem data={commitData} listRef={listRef} />
     </ListBoxFrame>
   );
 };
