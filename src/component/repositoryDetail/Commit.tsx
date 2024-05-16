@@ -1,5 +1,5 @@
 // MODULE
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
 // API
@@ -57,6 +57,7 @@ type CommitTypes = {
   repoName: string;
   page: number;
   listRef: any;
+  data: object;
 };
 
 const useGetRepositoryCommitList = (
@@ -65,18 +66,16 @@ const useGetRepositoryCommitList = (
   page: number
 ) => {
   return useInfiniteQuery({
-    queryKey: ["commit-history", id, repoName],
-    queryFn: ({ pageParam = 1 }) =>
+    queryKey: ["commit-history", id, repoName, page],
+    queryFn: ({ pageParam = page }) =>
       memberRepositoryCommitGET(id, repoName, pageParam),
-    initialSize: 1,
-    getNextPageParam: ({ data }) => {
-      const { next_page } = data;
-      // Check if there are more pages and limit to 5 pages
-      return next_page && page < 5 ? next_page : undefined;
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any, pages: object) => {
+      console.log(pages);
     },
   });
 };
-const ResultItem: React.FC = ({ data, listRef }) => {
+const ResultItem: React.FC<CommitTypes> = ({ data, listRef }) => {
   return (
     <ul>
       {data !== undefined &&
@@ -118,43 +117,55 @@ const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
   const [page, setPage] = useState<number>(1);
   const [listRef, listInView] = useInView();
 
-  const { data, isFetching }: any = useGetRepositoryCommitList(
-    id,
-    repoName,
-    page
-  );
-  console.log("data", isFetching);
-  const getCommitData = async () => {
-    try {
-      const response: any | object = await memberRepositoryCommitGET(
-        JSON.parse(StorageData).login,
-        repoName,
-        page
-      );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const { data, fetchNextPage }: any = useGetRepositoryCommitList(
+  //   id,
+  //   repoName,
+  //   page
+  // );
 
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ["commit-history", id, repoName],
+    queryFn: ({ pageParam }) =>
+      memberRepositoryCommitGET(id, repoName, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+      if (lastPage.data === 0) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    maxPages: 5,
+  });
   useEffect(() => {
     setCommitData(data?.pages[0].data);
-    if (listInView && page <= 5) {
-      if (data?.pages[0].data.length === 0) {
-        console.log("값 없음");
-      } else {
-        console.log(page);
+    if (listInView) {
+      if (page < 5 && !isFetchingNextPage) {
         setPage(page + 1);
-        // setCommitData((prevData) => [...prevData, ...data?.data]);
+        fetchNextPage();
+        // setCommitData((prevData) => [...prevData, ...data?.pages[page].data]);
+        // setCommitData(
+        //   data?.pages.map((item: unknown | any) => item.data).flat()
+        // );
       }
     }
-  }, [listInView, page, data]);
-
+  }, [listInView, data]);
   return (
     <ListBoxFrame>
       <div>Commit History</div>
-      <button onClick={() => getCommitData()}>커밋 가져오기</button>
-      <ResultItem data={commitData} listRef={listRef} />
+
+      <div>{isFetching && !isFetchingNextPage ? "Fetching..." : null}</div>
+      <ResultItem
+        data={data?.pages.map((item: unknown | any) => item.data).flat()}
+        listRef={listRef}
+      />
     </ListBoxFrame>
   );
 };

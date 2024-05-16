@@ -146,23 +146,33 @@ const MemberDetail: React.FC<Props> = () => {
       try {
         const response: any | Repo = await memberInfoGET(state.id);
         setUserData(response?.data);
-
         localStorage.setItem("userData", JSON.stringify(response?.data));
         getCurrentUserRepoList(response?.data.repos_url, page);
-      } catch (error) {
-        console.log(error);
-      } finally {
         const responseReadme: any | Repo = await memberRepoReadMeGET(
           state.id,
           state.id
         );
         setProfileRepo(responseReadme?.data.content);
         await addResultMemberDataToIndexedDB(
-          userData,
+          response?.data,
           responseReadme?.data.content,
           setTime,
           state.id
         );
+      } catch (error) {
+        console.log(error);
+      } finally {
+        // const responseReadme: any | Repo = await memberRepoReadMeGET(
+        //   state.id,
+        //   state.id
+        // );
+        // setProfileRepo(responseReadme?.data.content);
+        // await addResultMemberDataToIndexedDB(
+        //   userData,
+        //   responseReadme?.data.content,
+        //   setTime,
+        //   state.id
+        // );
       }
     } else {
       setUserData(getIndexedDB[0].memberResult);
@@ -170,7 +180,7 @@ const MemberDetail: React.FC<Props> = () => {
         "userData",
         JSON.stringify(getIndexedDB[0].memberResult)
       );
-      getCurrentUserRepoList(getIndexedDB[0].memberResult.repos_url, page);
+      getCurrentUserRepoList(getIndexedDB[0]?.memberResult.repos_url, page);
       setProfileRepo(getIndexedDB[0].readmeData);
     }
   };
