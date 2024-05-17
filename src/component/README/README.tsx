@@ -15,7 +15,9 @@ const ReadMeBox = styled.div`
   > *,
   > * * {
     font-size: revert;
+    white-space: pre-wrap;
   }
+  overflow-x: scroll;
   padding: 1rem;
   border-radius: ${(props) =>
     props.borderRadius === undefined ? "0.5rem" : props.borderRadius};
@@ -47,6 +49,7 @@ const ReadMeBox = styled.div`
   table {
     table-layout: fixed;
     border-collapse: collapse;
+
     thead {
       th {
         padding: 0.5rem;

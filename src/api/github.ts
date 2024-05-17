@@ -125,3 +125,32 @@ export const memberRepositoryCommitGET = (
       });
   });
 };
+// REPOSITORY SELECTDATE COMMIT
+export const memberRepositorySelectDateCommitGET = (
+  loginId: string,
+  repoName: string,
+  page: number,
+  year: number,
+  month: number
+) => {
+  const startYear = new Date(year, 0, 1);
+  const endYear = new Date(year, 11, 31);
+
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url}repos/${loginId}/${repoName}/commits`, {
+        params: {
+          since: startYear.toISOString(),
+          until: endYear.toISOString(),
+          page: page,
+        },
+        headers: { Authorization: `token ${token}` },
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};

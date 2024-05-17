@@ -62,7 +62,7 @@ const ResultSection = styled.div`
 const Result: React.FC<Props> = () => {
   const { searchResult, page, setPage, keyword } = searchStore();
   const { state } = useLocation();
-  const totalCount = searchResult?.total_count;
+  const totalCount: any | number = searchResult?.total_count;
   const resultObject = searchResult?.items;
   const MaxPage: number = Math.ceil(totalCount / 30);
 

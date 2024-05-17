@@ -1,6 +1,6 @@
 // MODULE
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // API
 import { memberSearchGET } from "../../api/github";
 
@@ -129,15 +129,21 @@ const Header: React.FC<Props> = () => {
               StorageData !== "null" &&
               StorageData !== "undefined" && (
                 <>
-                  <AvatarBox>
-                    <img
-                      src={JSON.parse(StorageData).avatar_url}
-                      alt=""
-                      loading="lazy"
-                      width={50}
-                      height={50}
-                    />
-                  </AvatarBox>
+                  <Link
+                    to={`/${JSON.parse(StorageData).login}`}
+                    state={`${JSON.parse(StorageData).login}`}
+                    className=""
+                  >
+                    <AvatarBox>
+                      <img
+                        src={JSON.parse(StorageData).avatar_url}
+                        alt=""
+                        loading="lazy"
+                        width={50}
+                        height={50}
+                      />
+                    </AvatarBox>
+                  </Link>
                   <p>
                     <span>{JSON.parse(StorageData).login}</span>님의 github 정보
                     보는중
