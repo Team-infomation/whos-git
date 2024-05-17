@@ -19,6 +19,7 @@ import {
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
 import Test from "../../component/chart/test/Test";
+import D3Calendar from "../../component/chart/calendar/D3Calendar";
 // TYPE
 interface Props {
   public_repo_count: number | null;
@@ -277,7 +278,8 @@ const MemberDetail: React.FC<Props> = () => {
             )}
           </>
         ) : (
-          <Test />
+          // <Test />
+          <D3Calendar />
         )}
       </div>
     </div>

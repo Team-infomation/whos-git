@@ -138,7 +138,8 @@ export const memberRepositorySelectDateCommitGET = (
 
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url}repos/${loginId}/${repoName}/commits`, {
+      // .get(`${url}repos/${loginId}/${repoName}/commits`, {
+      .get(`${url}repos/kkt9102/starbucksreserve/commits`, {
         params: {
           since: startYear.toISOString(),
           until: endYear.toISOString(),
