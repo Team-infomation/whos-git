@@ -17,7 +17,7 @@ const ReadMeBox = styled.div`
     font-size: revert;
     white-space: pre-wrap;
   }
-  overflow-x: scroll;
+  overflow-x: auto;
   padding: 1rem;
   border-radius: ${(props) =>
     props.borderRadius === undefined ? "0.5rem" : props.borderRadius};
