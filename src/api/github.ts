@@ -130,16 +130,15 @@ export const memberRepositorySelectDateCommitGET = (
   loginId: string,
   repoName: string,
   page: number,
-  year: number,
-  month: number
+  year: number
 ) => {
   const startYear = new Date(year, 0, 1);
   const endYear = new Date(year, 11, 31);
 
   return new Promise((resolve, reject) => {
     axios
-      // .get(`${url}repos/${loginId}/${repoName}/commits`, {
-      .get(`${url}repos/kkt9102/starbucksreserve/commits`, {
+      .get(`${url}repos/${loginId}/${repoName}/commits`, {
+        // .get(`${url}repos/kkt9102/starbucksreserve/commits`, {
         params: {
           since: startYear.toISOString(),
           until: endYear.toISOString(),

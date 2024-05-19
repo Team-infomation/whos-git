@@ -97,6 +97,7 @@ const TabButton = styled.div`
 import RepositoryDetail from "../../component/repositoryDetail";
 import FileList from "../../component/repositoryDetail/FileList";
 import Commit from "../../component/repositoryDetail/Commit";
+import ChartContents from "../../component/chart/ChartContents";
 // TYPE
 interface Repo {
   id: number;
@@ -236,6 +237,9 @@ const RepositoryList: React.FC<Repo> = () => {
         )}
         {tabActive === "commit" && (
           <Commit id={loginId} repoName={resultRepoName} />
+        )}
+        {tabActive === "chart" && (
+          <ChartContents id={loginId} repoName={resultRepoName} />
         )}
       </ViewSection>
     </div>

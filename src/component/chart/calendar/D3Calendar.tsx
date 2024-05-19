@@ -1,39 +1,54 @@
+// MODULE
 import React, { useRef, useState, useEffect } from "react";
 import { select } from "d3";
+import { useQuery } from "@tanstack/react-query";
+// API
 import { memberRepositorySelectDateCommitGET } from "../../../api/github";
+// TYPE
+type D3CalenderType = {
+  id: string;
+  repoName: string;
+  year: number;
+};
 
-const D3Calendar: React.FC = () => {
+const useGetCommitDataList = (
+  id: string,
+  repoName: string,
+  page: number,
+  year: number
+) => {
+  return useQuery({
+    queryKey: ["repoCommitData", id, repoName, page, year],
+    queryFn: () =>
+      memberRepositorySelectDateCommitGET(id, repoName, page, year),
+    staleTime: 1000 * 60 * 60,
+  });
+};
+
+const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [commitData, setCommitData] = useState<any[]>([]);
-  const selectedYear = 2023; // Set the selected year
-  const cellSize = 16;
+  const [page, setPage] = useState<number>(1);
+  const selectedYear = 2023;
+  const cellSize = 15;
+
+  const { isLoading, error, data } = useGetCommitDataList(
+    id,
+    repoName,
+    page,
+    selectedYear
+  );
 
   useEffect(() => {
-    fetchCommitData(selectedYear);
-  }, [selectedYear]);
-
-  const fetchCommitData = async (year: number) => {
-    try {
-      const response = await memberRepositorySelectDateCommitGET(
-        "loginId",
-        "repoName",
-        1,
-        year,
-        1 // Start from January
-      );
-      setCommitData(response.data);
-    } catch (error) {
-      console.error("Error fetching commit data:", error);
+    if (!isLoading && error === null) {
+      setCommitData(data?.data);
     }
-  };
-
-  useEffect(() => {
     renderCalendar();
-  }, [commitData]);
+  }, [commitData, isLoading, selectedYear]);
 
   const renderCalendar = () => {
     const width = 1000;
-    const height = 400;
+    const height = 600;
     const yearSpacing = 30;
 
     select(svgRef.current).selectAll("*").remove();
@@ -45,7 +60,7 @@ const D3Calendar: React.FC = () => {
     const g = svg.append("g").attr("transform", "translate(0, 0)");
 
     // Draw rectangles for each year
-    for (let year = selectedYear; year < selectedYear + 10; year++) {
+    for (let year = selectedYear; year < selectedYear + 5; year++) {
       const x = 0;
       const y =
         ((year - selectedYear) % 10) * (height / 10) +
@@ -69,60 +84,56 @@ const D3Calendar: React.FC = () => {
     }
 
     // Draw rectangles and text for each month of each year
-    for (let year = selectedYear; year < selectedYear + 10; year++) {
+    for (let year = selectedYear; year < selectedYear + 5; year++) {
       for (let month = 1; month <= 12; month++) {
-        const x = ((month - 1) % 12) * (width / 12) + cellSize + 5; // 월별 간격에 5px의 여백을 추가합니다.
+        const x = ((month - 1) % 12) * (width / 12) + cellSize + 5;
         const y =
           ((year - selectedYear) % 10) * (height / 10) +
           cellSize +
           yearSpacing * (year - selectedYear) +
-          5; // 월별 간격에 5px의 여백을 추가합니다.
+          5;
         const daysInMonth = new Date(year, month, 0).getDate();
         g.append("rect")
           .attr("x", x)
           .attr("y", y)
-          .attr("width", (width / 12 - cellSize) / 2) // 일별 사각형의 가로 길이를 설정합니다.
-          .attr("height", (height / 10 - cellSize) / 5) // 일별 사각형의 세로 길이를 설정합니다.
+          .attr("width", (width / 12 - cellSize) / 2)
+          .attr("height", (height / 10 - cellSize) / 5)
           .style("fill", "none")
           .style("stroke", "#000")
           .style("stroke-width", 1);
-        // Add month text
         g.append("text")
           .attr("x", x + (width / 12 - cellSize) / 4)
-          .attr("y", y - 5) // 위에 표시하므로 y 위치를 조정합니다.
+          .attr("y", y - 5)
           .style("text-anchor", "middle")
           .style("dominant-baseline", "central")
           .style("font-size", "12px")
-          .text(getMonthName(month)); // getMonthName 함수를 사용하여 월을 텍스트로 변환합니다.
+          .text(getMonthName(month));
 
         // Draw rectangles for each day of each month
         for (let day = 1; day <= daysInMonth; day++) {
           const dayX =
             ((month - 1) % 12) * (width / 12) +
             cellSize +
-            ((day - 1) % 7) * ((width / 12 - cellSize) / 7); // 월별 사각형의 가로 길이를 기준으로 나누어 각 일의 위치를 계산합니다.
+            ((day - 1) % 7) * ((width / 12 - cellSize) / 7);
           const dayY =
             ((year - selectedYear) % 10) * (height / 10) +
             cellSize +
-            Math.floor((day - 1) / 7) * ((height / 10 - cellSize) / 5) + // 월별 사각형의 세로 길이를 기준으로 나누어 각 일의 위치를 계산합니다.
+            Math.floor((day - 1) / 7) * ((height / 10 - cellSize) / 5) +
             yearSpacing * (year - selectedYear) +
-            5; // 월별 간격에 5px의 여백을 추가합니다.
+            5;
+          const currentDate = new Date(year, month - 1, day); // month는 0부터 시작하므로 1을 뺍니다.
+          const formattedDate = currentDate.toISOString().split("T")[0]; // ISO 형식의 날짜를 YYYY-MM-DD 형식으로 변환합니다.
+          const hasCommit = commitData.some(
+            (data) => data.date === formattedDate
+          ); // 해당 날짜에 커밋이 있는지 확인합니다.
           g.append("rect")
             .attr("x", dayX)
             .attr("y", dayY)
-            .attr("width", (width / 12 - cellSize) / 7) // 일별 사각형의 가로 길이를 설정합니다.
-            .attr("height", height / 10 - cellSize) // 일별 사각형의 세로 길이를 설정합니다.
-            .style("fill", "none")
+            .attr("width", (width / 12 - cellSize) / 7)
+            .attr("height", height / 10 - cellSize)
+            .style("fill", hasCommit ? "green" : "none") // 커밋이 있는 날은 녹색으로 표시합니다.
             .style("stroke", "#000")
             .style("stroke-width", 1);
-          // g.append("text")
-          //   .attr("x", dayX + (width / 12 - cellSize) / 7 / 2) // 텍스트의 x 위치를 사각형의 중심으로 설정합니다.
-          //   .attr("y", dayY + (height / 10 - cellSize)) // 텍스트의 y 위치를 사각형의 중심으로 설정합니다.
-          //   .attr("dy", "0.35em") // 텍스트의 위치를 조정합니다.
-          //   .style("text-anchor", "middle")
-          //   .style("dominant-baseline", "middle")
-          //   .style("font-size", "10px") // 텍스트의 크기를 조정합니다.
-          //   .text(day);
         }
       }
     }
@@ -145,7 +156,7 @@ const D3Calendar: React.FC = () => {
     return monthNames[month - 1];
   };
   return (
-    <div style={{ overflowX: "auto", maxWidth: "1000px" }}>
+    <div style={{ overflow: "auto", maxWidth: "1000px" }}>
       {commitData.length > 0 ? <svg ref={svgRef}></svg> : <div>Loading...</div>}
     </div>
   );
