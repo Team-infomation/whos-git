@@ -149,9 +149,9 @@ const RepositoryList: React.FC<Repo> = () => {
   useEffect(() => {
     // handleChangeRepositoryDetail();
     if (inView) {
-      console.log("작동1");
+      // console.log("작동1");
     } else {
-      console.log("작동2");
+      // console.log("작동2");
     }
   }, [inView]);
   useLayoutEffect(() => {

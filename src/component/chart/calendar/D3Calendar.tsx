@@ -1,55 +1,34 @@
 // MODULE
 import React, { useRef, useState, useEffect } from "react";
 import { select } from "d3";
-import { useQuery } from "@tanstack/react-query";
 // API
-import { memberRepositorySelectDateCommitGET } from "../../../api/github";
 // TYPE
 type D3CalenderType = {
   id: string;
   repoName: string;
   year: number;
+  propsData: object[];
 };
 
-const useGetCommitDataList = (
-  id: string,
-  repoName: string,
-  page: number,
-  year: number
-) => {
-  return useQuery({
-    queryKey: ["repoCommitData", id, repoName, page, year],
-    queryFn: () =>
-      memberRepositorySelectDateCommitGET(id, repoName, page, year),
-    staleTime: 1000 * 60 * 60,
-  });
-};
-
-const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
+const D3Calendar: React.FC<D3CalenderType> = ({
+  id,
+  repoName,
+  year,
+  propsData,
+}) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [commitData, setCommitData] = useState<any[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const selectedYear = 2023;
+  const [commitData, setCommitData] = useState<any[]>(propsData);
+  const selectedYear = year;
   const cellSize = 15;
 
-  const { isLoading, error, data } = useGetCommitDataList(
-    id,
-    repoName,
-    page,
-    selectedYear
-  );
-
   useEffect(() => {
-    if (!isLoading && error === null) {
-      setCommitData(data?.data);
-    }
     renderCalendar();
-  }, [commitData, isLoading, selectedYear]);
+  }, [commitData, selectedYear]);
 
   const renderCalendar = () => {
     const width = 1000;
     const height = 600;
-    const yearSpacing = 30;
+    const yearSpacing = 50;
 
     select(svgRef.current).selectAll("*").remove();
 
@@ -57,10 +36,10 @@ const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
       .attr("width", width)
       .attr("height", height);
 
-    const g = svg.append("g").attr("transform", "translate(0, 0)");
+    const g = svg.append("g").attr("transform", "translate(0, 30)");
 
     // Draw rectangles for each year
-    for (let year = selectedYear; year < selectedYear + 5; year++) {
+    for (let year = selectedYear; year < selectedYear + 1; year++) {
       const x = 0;
       const y =
         ((year - selectedYear) % 10) * (height / 10) +
@@ -70,21 +49,21 @@ const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
         .attr("y", y)
         .attr("width", cellSize)
         .attr("height", height / 10)
-        .style("fill", "none")
-        .style("stroke", "#000")
-        .style("stroke-width", 1);
+        .style("fill", "none");
       g.append("text")
-        .attr("x", x + cellSize / 2)
-        .attr("y", y + height / 10 / 2)
+        // .attr("x", x + cellSize / 2)
+        .attr("y", y + height / -40)
+        .attr("x", 30)
         .style("margin-top", "20px")
         .style("font-size", "20px")
+        .style("font-weight", "700")
         .style("text-anchor", "middle")
         .style("dominant-baseline", "central")
         .text(year);
     }
 
     // Draw rectangles and text for each month of each year
-    for (let year = selectedYear; year < selectedYear + 5; year++) {
+    for (let year = selectedYear; year < selectedYear + 1; year++) {
       for (let month = 1; month <= 12; month++) {
         const x = ((month - 1) % 12) * (width / 12) + cellSize + 5;
         const y =
@@ -98,15 +77,13 @@ const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
           .attr("y", y)
           .attr("width", (width / 12 - cellSize) / 2)
           .attr("height", (height / 10 - cellSize) / 5)
-          .style("fill", "none")
-          .style("stroke", "#000")
-          .style("stroke-width", 1);
+          .style("fill", "none");
         g.append("text")
           .attr("x", x + (width / 12 - cellSize) / 4)
-          .attr("y", y - 5)
+          .attr("y", y - 10)
           .style("text-anchor", "middle")
           .style("dominant-baseline", "central")
-          .style("font-size", "12px")
+          .style("font-size", "18px")
           .text(getMonthName(month));
 
         // Draw rectangles for each day of each month
@@ -121,19 +98,21 @@ const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
             Math.floor((day - 1) / 7) * ((height / 10 - cellSize) / 5) +
             yearSpacing * (year - selectedYear) +
             5;
-          const currentDate = new Date(year, month - 1, day); // month는 0부터 시작하므로 1을 뺍니다.
-          const formattedDate = currentDate.toISOString().split("T")[0]; // ISO 형식의 날짜를 YYYY-MM-DD 형식으로 변환합니다.
+          const currentDate = new Date(year, month - 1, day);
+          const formattedDate = currentDate.toISOString().split("T")[0];
           const hasCommit = commitData.some(
-            (data) => data.date === formattedDate
-          ); // 해당 날짜에 커밋이 있는지 확인합니다.
+            (data) => data.commit.author.date.split("T")[0] === formattedDate
+          );
+
           g.append("rect")
-            .attr("x", dayX)
-            .attr("y", dayY)
-            .attr("width", (width / 12 - cellSize) / 7)
-            .attr("height", height / 10 - cellSize)
-            .style("fill", hasCommit ? "green" : "none") // 커밋이 있는 날은 녹색으로 표시합니다.
+            .attr("x", dayX - 7)
+            .attr("y", dayY + 7)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("title", formattedDate)
+            .style("fill", hasCommit ? "green" : "none")
             .style("stroke", "#000")
-            .style("stroke-width", 1);
+            .style("stroke-width", 0.5);
         }
       }
     }
@@ -157,7 +136,18 @@ const D3Calendar: React.FC<D3CalenderType> = ({ id, repoName, year }) => {
   };
   return (
     <div style={{ overflow: "auto", maxWidth: "1000px" }}>
-      {commitData.length > 0 ? <svg ref={svgRef}></svg> : <div>Loading...</div>}
+      {/* {isLoading ? (
+        <div>Loading...</div>
+      ) : commitData.length > 0 ? (
+        <svg ref={svgRef}></svg>
+      ) : (
+        <div>해당년도에 commit 기록이 없습니다.</div>
+      )} */}
+      {commitData.length > 0 ? (
+        <svg ref={svgRef}></svg>
+      ) : (
+        <div>해당년도에 commit 기록이 없습니다.</div>
+      )}
     </div>
   );
 };
