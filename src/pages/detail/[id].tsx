@@ -20,6 +20,7 @@ import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
 import Test from "../../component/chart/test/Test";
 import D3Calendar from "../../component/chart/calendar/D3Calendar";
+import Meta from "../../component/meta/Meta";
 // TYPE
 interface Props {
   public_repo_count: number | null;
@@ -89,30 +90,33 @@ const RepositoryList: React.FC<Props> = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <RepoBox>
-      <h5>
-        총<span> {public_repo_count}</span>개의 저장소를 볼 수 있어요
-      </h5>
-      <ul>
-        {public_repo !== null &&
-          Array.isArray(public_repo) &&
-          public_repo.map((repo: Repo) => (
-            <li
-              key={repo.id}
-              onClick={() =>
-                navigate(`/${loginId}/${repo.name}`, {
-                  state: { loginId: loginId, repoName: repo.name },
-                })
-              }
-            >
-              <RepositoryItem repoData={repo} />
-            </li>
-          ))}
-        {public_repo !== null && public_repo?.length > 29 && (
-          <li ref={listRef}></li>
-        )}
-      </ul>
-    </RepoBox>
+    <>
+      <Meta id={loginId} />
+      <RepoBox>
+        <h5>
+          총<span> {public_repo_count}</span>개의 저장소를 볼 수 있어요
+        </h5>
+        <ul>
+          {public_repo !== null &&
+            Array.isArray(public_repo) &&
+            public_repo.map((repo: Repo) => (
+              <li
+                key={repo.id}
+                onClick={() =>
+                  navigate(`/${loginId}/${repo.name}`, {
+                    state: { loginId: loginId, repoName: repo.name },
+                  })
+                }
+              >
+                <RepositoryItem repoData={repo} />
+              </li>
+            ))}
+          {public_repo !== null && public_repo?.length > 29 && (
+            <li ref={listRef}></li>
+          )}
+        </ul>
+      </RepoBox>
+    </>
   );
 };
 

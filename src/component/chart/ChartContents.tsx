@@ -1,6 +1,7 @@
 // MODULE
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import styled from "styled-components";
 // API
 import { memberRepositorySelectDateCommitGET } from "../../api/github";
 // COMPONENT
@@ -11,14 +12,19 @@ type ChartContentType = {
   repoName: string;
   year: number;
 };
+// STYLED
+const YearSelectMenuBox = styled.div``;
+const ChartFrame = styled.div`
+  border: 1px solid var(--gray);
+  overflow: auto;
+  scrollbar-width: none;
+`;
 
 const YearSelectBox: React.FC = () => {
   return <></>;
 };
 
 const ChartContents: React.FC<ChartContentType> = ({ id, repoName }) => {
-  const [minYear, setMinYear] = useState<number>(0);
-  // const [yearList, setYearList] = useState<object[]>([]);
   const [year, setYear] = useState<number>(2022);
   const [commitData, setCommitData] = useState<any[]>([]);
   const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } =
@@ -40,39 +46,46 @@ const ChartContents: React.FC<ChartContentType> = ({ id, repoName }) => {
   const StorageData: string | any = localStorage.getItem("userData");
 
   const yearList: object[] = [];
+  const minYear = Number(JSON.parse(StorageData).created_at.slice(0, 4));
   const maxYear = new Date().getFullYear();
-  const setttingYearList = () => {
+
+  const handleChangeSelectYears = (year: number) => {
+    setYear(year);
+  };
+  useLayoutEffect(() => {
     for (let i = minYear; i <= maxYear; i++) {
       yearList.push({ i });
     }
-  };
-  useLayoutEffect(() => {
-    setMinYear(Number(JSON.parse(StorageData).created_at.slice(0, 4)));
-    setttingYearList();
-  }, [maxYear]);
+    setCommitData(yearList);
+  }, []);
 
   useEffect(() => {
     fetchNextPage();
   }, [data]);
-  console.log(yearList);
   return (
     <>
-      <div>
-        <input type="text" />
-      </div>
-      <div className="year_test">
-        {/* {yearList.map((item) => (
-          <p key={item}>{item}</p>
-        ))} */}
-      </div>
-      {!isFetching && !isFetchingNextPage && !hasNextPage && (
-        <D3Calendar
-          id={id}
-          repoName={repoName}
-          year={year}
-          propsData={data?.pages.flatMap((page) => page.data)}
-        />
-      )}
+      <YearSelectMenuBox>
+        <ul className="year_list flex flex_jc_s flex_ai_c">
+          {commitData.length !== 0 &&
+            commitData?.map((item, index) => (
+              <li key={index} style={{ marginRight: "1rem" }}>
+                <button onClick={() => handleChangeSelectYears(item.i)}>
+                  {item.i}
+                </button>
+              </li>
+            ))}
+        </ul>
+      </YearSelectMenuBox>
+      <ChartFrame>
+        {!isFetching && !isFetchingNextPage && !hasNextPage && (
+          <D3Calendar
+            id={id}
+            repoName={repoName}
+            year={year}
+            propsData={data?.pages.flatMap((page) => page.data)}
+          />
+        )}
+      </ChartFrame>
     </>
   );
 };

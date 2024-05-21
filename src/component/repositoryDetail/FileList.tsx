@@ -196,7 +196,7 @@ const FileList: React.FC<FileListProps> = ({ listData, id, repoName }) => {
                 style={{ fontSize: "2rem" }}
               >
                 {option.name}
-                <i className={option.icon}></i>
+                {/* <i className={option.icon}></i> */}
               </option>
             ))}
           </select>
