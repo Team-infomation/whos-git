@@ -15,7 +15,7 @@ const ReadMeBox = styled.div`
   > *,
   > * * {
     font-size: revert;
-    white-space: pre-wrap;
+    // white-space: pre-wrap;
   }
   overflow-x: auto;
   padding: 1rem;

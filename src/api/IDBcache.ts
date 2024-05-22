@@ -58,7 +58,6 @@ export const addResultMemberDataToIndexedDB = (
           db.close();
         };
         resolve(e);
-        console.log("member", e);
       };
 
       setMemberData.onerror = (e) => {
@@ -144,7 +143,6 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
         });
 
         resolve(filteredByLoginAndTime);
-        console.log("check", filteredByLoginAndTime);
       };
 
       members.onerror = (e) => {
@@ -174,7 +172,6 @@ export const addResultDataToIndexedDB = (resultData: object) => {
           db.close();
         };
         resolve(e);
-        console.log("searchResult", e);
       };
 
       setResult.onerror = (e) => {
@@ -211,7 +208,6 @@ export const addRepositoryReadmeDataToIndexedDB = (
           db.close();
         };
         resolve(e);
-        console.log("repoReadme", e);
       };
 
       setResult.onerror = (e) => {
@@ -296,7 +292,6 @@ export const addRepositoryFileListDataToIndexedDB = (
           db.close();
         };
         resolve(e);
-        console.log("repository", e);
       };
 
       repository.onerror = (e) => {

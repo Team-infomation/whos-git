@@ -81,10 +81,13 @@ const RepoBox = styled.div`
       padding: 1.5rem;
       margin-bottom: 1.5rem;
       border: 1px solid var(--light-gray);
-      h2 {
+      > div {
         flex-grow: 1;
-        font-size: 2rem;
-        font-weight: 700;
+        h2 {
+          flex-grow: 1;
+          font-size: 2rem;
+          font-weight: 700;
+        }
       }
     }
   }
@@ -102,6 +105,38 @@ const CloneButton = styled.button`
   font-weight: 700;
   color: var(--white);
 `;
+const KeywordBox = styled.div`
+  position: relative;
+  flex-basis: 40rem;
+  input {
+    width: 100%;
+    padding: 0.5rem 3rem 0.5rem 1rem;
+    border: 1px solid var(--gray);
+    font-size: 1.6rem;
+    &::placeholder {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--light-gray);
+    }
+  }
+  button {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    width: 2rem;
+    height: 2rem;
+    top: calc(50% - 1rem);
+    right: 0.5rem;
+    background: var(--gray);
+    border-radius: 5px;
+    border: 1px solid var(--gray);
+    font-size: 1.6rem;
+    color: var(--white);
+    cursor: pointer;
+  }
+`;
 const RepositoryList: React.FC<Props> = ({
   public_repo_count,
   public_repo,
@@ -110,22 +145,62 @@ const RepositoryList: React.FC<Props> = ({
 }) => {
   const navigate = useNavigate();
 
+  const [keyword, setKeyword] = useState<string>("");
+
+  const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setKeyword(e.target.value);
+  };
+  const handleClearKeyword = () => {
+    setKeyword("");
+  };
+
   const handleCopyGeiCloneURL = (url: string, repoName: string) => {
     window.navigator.clipboard.writeText(url).then(() => {
       alert(`${repoName} 리포지토리 주소가 복사되었습니다!`);
     });
   };
+
   return (
     <>
       <Meta id={loginId} />
       <RepoBox>
-        <h5>
-          총<span> {public_repo_count}</span>개의 저장소를 볼 수 있어요
-        </h5>
+        <div className="flex flex_jc_sb flex_ai_c">
+          <h5>
+            총
+            {keyword === "" ? (
+              <span>{public_repo_count}개의 저장소를 볼 수 있어요</span>
+            ) : (
+              <span>
+                {
+                  public_repo.filter((repo: Repo) =>
+                    repo.name.includes(keyword)
+                  ).length
+                }
+                개의 저장소가 확인되요
+              </span>
+            )}
+          </h5>
+          <KeywordBox>
+            <input
+              type="text"
+              id="filter_repo"
+              value={keyword}
+              onChange={onChangeKeyword}
+              placeholder="찾을 저장소 키워드를 입력해주세요"
+            />
+            {keyword !== "" && (
+              <button onClick={() => handleClearKeyword()}>X</button>
+            )}
+          </KeywordBox>
+        </div>
         <ul>
           {public_repo !== null &&
             Array.isArray(public_repo) &&
-            public_repo.map((repo: Repo) => (
+            (keyword === ""
+              ? public_repo
+              : public_repo.filter((repo: Repo) => repo.name.includes(keyword))
+            ).map((repo: Repo) => (
               <li key={repo.id} className="flex flex_ai_c flex_jc_sb">
                 <RepositoryItem
                   repoData={repo}
@@ -227,6 +302,7 @@ const MemberDetail: React.FC<Props> = () => {
       getMemberInfo();
     } else {
       setUserData(JSON.parse(StorageData));
+      setProfileRepo(localStorage.getItem("userReadMe"));
       getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
     }
   }, []);
@@ -254,7 +330,6 @@ const MemberDetail: React.FC<Props> = () => {
   useEffect(() => {
     getResultMemberDataToIndexedDB(state.id);
   }, []);
-
   return (
     <>
       {headerFixed && <MoveTop />}
