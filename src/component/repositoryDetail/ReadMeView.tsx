@@ -15,7 +15,7 @@ interface Props {
   apiData: object | any;
   repoName: string;
 }
-const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
+const ReadMeView: React.FC<Props> = ({ apiData, repoName }) => {
   const { tabActive } = commonStore();
   const [readMe, setReadMe] = useState<string>("");
 
@@ -51,16 +51,24 @@ const RepositoryDetail: React.FC<Props> = ({ apiData, repoName }) => {
   };
 
   let readmeElement;
-  for (let i = 0; i < apiData.length; i++) {
-    if (apiData[i].name === "README.md") {
-      readmeElement = apiData[i];
+  for (const element of apiData) {
+    if (element.name === "README.md") {
+      readmeElement = element;
       break;
     }
   }
+
+  // for (let i = 0; i < apiData.length; i++) {
+  //   if (apiData[i].name === "README.md") {
+  //     readmeElement = apiData[i];
+  //     break;
+  //   }
+  // }
+
   if (readmeElement) {
     getReadMe();
   }
   return readMe !== "" && <README readme={readMe} radius={0} />;
 };
 
-export default RepositoryDetail;
+export default ReadMeView;

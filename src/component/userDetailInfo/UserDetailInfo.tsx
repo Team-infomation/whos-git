@@ -35,7 +35,7 @@ const UserDetailInfo: React.FC<Props> = ({
         <img src={avatar} alt="" loading="lazy" width={120} height={120} />
       </AvatarBox>
       <LoginId login={loginId} />
-      {profileRepo === null ? (
+      {profileRepo === "" ? (
         <BioBox>{bio !== null ? bio : ""}</BioBox>
       ) : (
         <README readme={profileRepo} radius={"0.5rem"} />

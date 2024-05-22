@@ -8,7 +8,7 @@ import { Buffer } from "buffer";
 // TYPE
 interface Props {
   readme: string;
-  radius: string;
+  radius: string | number;
 }
 // STYLED
 const ReadMeBox = styled.div`

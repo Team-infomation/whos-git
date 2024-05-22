@@ -93,7 +93,7 @@ const TabButton = styled.div`
   }
 `;
 // COMPONENT
-import RepositoryDetail from "../../component/repositoryDetail";
+import ReadMeView from "../../component/repositoryDetail/ReadMeView";
 import FileList from "../../component/repositoryDetail/FileList";
 import Commit from "../../component/repositoryDetail/Commit";
 import ChartContents from "../../component/chart/ChartContents";
@@ -229,7 +229,7 @@ const RepositoryList: React.FC<Repo> = () => {
       </TabButton>
       <ViewSection className={`${!inView && "active"}`}>
         {tabActive === "readme" && (
-          <RepositoryDetail apiData={APIData} repoName={resultRepoName} />
+          <ReadMeView apiData={APIData} repoName={resultRepoName} />
         )}
         {tabActive === "repo" && (
           <FileList listData={APIData} id={loginId} repoName={resultRepoName} />
