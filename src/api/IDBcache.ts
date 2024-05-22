@@ -132,6 +132,17 @@ export const getResultMemberDataToIndexedDB = (login: string) => {
             Math.abs(currentTime - item.setTime) <= 60 * 60 * 1000
         );
 
+        // 시간이 초과된 데이터를 수집하고 삭제하는 로직
+        const expiredData = result.filter(
+          (item: any) =>
+            item.memberId === login &&
+            Math.abs(currentTime - item.setTime) > 60 * 60 * 1000
+        );
+
+        expiredData.forEach((item: any) => {
+          memberDB.delete(item.id);
+        });
+
         resolve(filteredByLoginAndTime);
         console.log("check", filteredByLoginAndTime);
       };

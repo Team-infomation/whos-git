@@ -5,4 +5,5 @@ import withReactRouter from "vite-plugin-next-react-router";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), withReactRouter()],
+  server: { port: 3005 },
 });

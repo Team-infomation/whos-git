@@ -1,8 +1,11 @@
+// MODULE
 import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Outlet } from "react-router-dom";
+// COMPONENT
 import Header from "../component/header";
+// STYLE
 
 const Layout: React.FC = () => {
   const queryClient = new QueryClient();

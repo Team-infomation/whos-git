@@ -19,6 +19,7 @@ import {
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
 import Meta from "../../component/meta/Meta";
+import MoveTop from "../../component/common/moveTop/MoveTop";
 // TYPE
 interface Props {
   public_repo_count: number | null;
@@ -108,6 +109,7 @@ const RepositoryList: React.FC<Props> = ({
   listRef,
 }) => {
   const navigate = useNavigate();
+
   const handleCopyGeiCloneURL = (url: string, repoName: string) => {
     window.navigator.clipboard.writeText(url).then(() => {
       alert(`${repoName} 리포지토리 주소가 복사되었습니다!`);
@@ -153,7 +155,8 @@ const RepositoryList: React.FC<Props> = ({
 
 const MemberDetail: React.FC<Props> = () => {
   const { state } = useLocation();
-  const { setHeaderFixed, detailView, setDetailView } = commonStore();
+  const { headerFixed, setHeaderFixed, detailView, setDetailView } =
+    commonStore();
 
   const [userData, setUserData] = useState<Repo | any>(null);
   const [profileRepo, setProfileRepo] = useState<string>("");
@@ -189,6 +192,7 @@ const MemberDetail: React.FC<Props> = () => {
           state.id
         );
         setProfileRepo(responseReadme?.data.content);
+        localStorage.setItem("userReadMe", responseReadme?.data.content);
         await addResultMemberDataToIndexedDB(
           response?.data,
           responseReadme?.data.content,
@@ -197,7 +201,6 @@ const MemberDetail: React.FC<Props> = () => {
         );
       } catch (error) {
         console.log(error);
-      } finally {
       }
     } else {
       setUserData(getIndexedDB[0].memberResult);
@@ -253,59 +256,65 @@ const MemberDetail: React.FC<Props> = () => {
   }, []);
 
   return (
-    <div className="con">
-      <div className="observer_box" ref={ref}>
-        {userData !== null && (
-          <UserDetailInfo
-            avatar={userData.avatar_url}
-            loginId={userData.login}
-            profileRepo={profileRepo}
-            bio={userData.bio}
-          />
-        )}
+    <>
+      {headerFixed && <MoveTop />}
+      <div className="con">
+        <div className="observer_box" ref={ref}>
+          {userData !== null && (
+            <UserDetailInfo
+              avatar={userData.avatar_url}
+              loginId={userData.login}
+              profileRepo={profileRepo}
+              bio={userData.bio}
+            />
+          )}
+        </div>
+        <TabButton>
+          <ul className="flex flex_ai_c">
+            <li
+              id="repo"
+              className={`${
+                tabActive === "repo" && "active"
+              } flex flex_jc_c flex_ai_c cursor_p`}
+            >
+              <button onClick={() => handleTabMenuButton("repo")} value="repo">
+                Repository
+              </button>
+            </li>
+            <li
+              id="chart"
+              className={`${
+                tabActive === "chart" && "active"
+              } flex flex_jc_c flex_ai_c cursor_p`}
+            >
+              <button
+                onClick={() => handleTabMenuButton("chart")}
+                value="chart"
+              >
+                Chart
+              </button>
+            </li>
+          </ul>
+        </TabButton>
+        <div>
+          {tabActive === "repo" ? (
+            <>
+              <ScrollRestoration />
+              {publicRepo && userData && StorageData !== null && (
+                <RepositoryList
+                  public_repo_count={userData?.public_repos}
+                  public_repo={publicRepo}
+                  loginId={JSON.parse(StorageData).login}
+                  listRef={listRef}
+                />
+              )}
+            </>
+          ) : (
+            "준비중"
+          )}
+        </div>
       </div>
-      <TabButton>
-        <ul className="flex flex_ai_c">
-          <li
-            id="repo"
-            className={`${
-              tabActive === "repo" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button onClick={() => handleTabMenuButton("repo")} value="repo">
-              Repository
-            </button>
-          </li>
-          <li
-            id="chart"
-            className={`${
-              tabActive === "chart" && "active"
-            } flex flex_jc_c flex_ai_c cursor_p`}
-          >
-            <button onClick={() => handleTabMenuButton("chart")} value="chart">
-              Chart
-            </button>
-          </li>
-        </ul>
-      </TabButton>
-      <div>
-        {tabActive === "repo" ? (
-          <>
-            <ScrollRestoration />
-            {publicRepo && userData && StorageData !== null && (
-              <RepositoryList
-                public_repo_count={userData?.public_repos}
-                public_repo={publicRepo}
-                loginId={JSON.parse(StorageData).login}
-                listRef={listRef}
-              />
-            )}
-          </>
-        ) : (
-          "준비중"
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
