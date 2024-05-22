@@ -18,8 +18,6 @@ import {
 // COMPONENT
 import UserDetailInfo from "../../component/userDetailInfo";
 import RepositoryItem from "../../component/repositoryItem";
-import Test from "../../component/chart/test/Test";
-import D3Calendar from "../../component/chart/calendar/D3Calendar";
 import Meta from "../../component/meta/Meta";
 // TYPE
 interface Props {
@@ -79,8 +77,29 @@ const RepoBox = styled.div`
     margin-top: 2rem;
     li {
       cursor: crosshair;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--light-gray);
+      h2 {
+        flex-grow: 1;
+        font-size: 2rem;
+        font-weight: 700;
+      }
     }
   }
+`;
+const CloneButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-basis: 8rem;
+  height: 2.5rem;
+  margin-left: 2rem;
+  background: #314d76;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--white);
 `;
 const RepositoryList: React.FC<Props> = ({
   public_repo_count,
@@ -89,6 +108,11 @@ const RepositoryList: React.FC<Props> = ({
   listRef,
 }) => {
   const navigate = useNavigate();
+  const handleCopyGeiCloneURL = (url: string, repoName: string) => {
+    window.navigator.clipboard.writeText(url).then(() => {
+      alert(`${repoName} 리포지토리 주소가 복사되었습니다!`);
+    });
+  };
   return (
     <>
       <Meta id={loginId} />
@@ -100,15 +124,22 @@ const RepositoryList: React.FC<Props> = ({
           {public_repo !== null &&
             Array.isArray(public_repo) &&
             public_repo.map((repo: Repo) => (
-              <li
-                key={repo.id}
-                onClick={() =>
-                  navigate(`/${loginId}/${repo.name}`, {
-                    state: { loginId: loginId, repoName: repo.name },
-                  })
-                }
-              >
-                <RepositoryItem repoData={repo} />
+              <li key={repo.id} className="flex flex_ai_c flex_jc_sb">
+                <RepositoryItem
+                  repoData={repo}
+                  event={() =>
+                    navigate(`/${loginId}/${repo.name}`, {
+                      state: { loginId: loginId, repoName: repo.name },
+                    })
+                  }
+                />
+                <CloneButton
+                  onClick={() =>
+                    handleCopyGeiCloneURL(repo.clone_url, repo?.name)
+                  }
+                >
+                  Clone
+                </CloneButton>
               </li>
             ))}
           {public_repo !== null && public_repo?.length > 29 && (
@@ -167,17 +198,6 @@ const MemberDetail: React.FC<Props> = () => {
       } catch (error) {
         console.log(error);
       } finally {
-        // const responseReadme: any | Repo = await memberRepoReadMeGET(
-        //   state.id,
-        //   state.id
-        // );
-        // setProfileRepo(responseReadme?.data.content);
-        // await addResultMemberDataToIndexedDB(
-        //   userData,
-        //   responseReadme?.data.content,
-        //   setTime,
-        //   state.id
-        // );
       }
     } else {
       setUserData(getIndexedDB[0].memberResult);
@@ -282,8 +302,7 @@ const MemberDetail: React.FC<Props> = () => {
             )}
           </>
         ) : (
-          // <Test />
-          <D3Calendar />
+          "준비중"
         )}
       </div>
     </div>

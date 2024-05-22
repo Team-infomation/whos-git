@@ -30,12 +30,12 @@ const TypeBox = styled.div`
   border-radius: 50%;
 `;
 const TabButton = styled.div`
-  // justify-content: flex-start;
   > * {
     transition: all 0.3s;
   }
   > div {
     flex-basis: 0;
+    margin-left: calc((100% - 100rem) / 2);
     overflow: hidden;
     h3 {
       font-size: 2.4rem;
@@ -81,7 +81,6 @@ const TabButton = styled.div`
     > div {
       flex-basis: calc(100rem - 54rem);
       padding: 0 2rem;
-      margin-left: calc((100% - 100rem) / 2);
       overflow: visible;
     }
     > ul {
@@ -169,7 +168,7 @@ const RepositoryList: React.FC<Repo> = () => {
         <div className="flex flex_jc_s flex_ai_c">
           <h3>{repoName}</h3>
         </div>
-        <ul className="flex flex_ai_c">
+        <ul className="flex flex_ai_fe">
           <li
             id="readme"
             className={`${
@@ -235,11 +234,11 @@ const RepositoryList: React.FC<Repo> = () => {
         {tabActive === "repo" && (
           <FileList listData={APIData} id={loginId} repoName={resultRepoName} />
         )}
-        {tabActive === "commit" && (
-          <Commit id={loginId} repoName={resultRepoName} />
-        )}
         {tabActive === "chart" && (
           <ChartContents id={loginId} repoName={resultRepoName} />
+        )}
+        {tabActive === "commit" && (
+          <Commit id={loginId} repoName={resultRepoName} />
         )}
       </ViewSection>
     </div>

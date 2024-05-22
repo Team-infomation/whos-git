@@ -60,21 +60,6 @@ type CommitTypes = {
   data: object;
 };
 
-const useGetRepositoryCommitList = (
-  id: string,
-  repoName: string,
-  page: number
-) => {
-  return useInfiniteQuery({
-    queryKey: ["commit-history", id, repoName, page],
-    queryFn: ({ pageParam = page }) =>
-      memberRepositoryCommitGET(id, repoName, pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage: any, pages: object) => {
-      console.log(pages);
-    },
-  });
-};
 const ResultItem: React.FC<CommitTypes> = ({ data, listRef }) => {
   return (
     <ul>
@@ -117,43 +102,26 @@ const Commit: React.FC<CommitTypes> = ({ id, repoName }) => {
   const [page, setPage] = useState<number>(1);
   const [listRef, listInView] = useInView();
 
-  // const { data, fetchNextPage }: any = useGetRepositoryCommitList(
-  //   id,
-  //   repoName,
-  //   page
-  // );
-
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ["commit-history", id, repoName],
-    queryFn: ({ pageParam }) =>
-      memberRepositoryCommitGET(id, repoName, pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      if (lastPage.data === 0) {
-        return undefined;
-      }
-      return lastPageParam + 1;
-    },
-    maxPages: 5,
-  });
+  const { data, fetchNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["commit-history", id, repoName],
+      queryFn: ({ pageParam }) =>
+        memberRepositoryCommitGET(id, repoName, pageParam),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, allPages, lastPageParam) => {
+        if (lastPage.data === 0) {
+          return undefined;
+        }
+        return lastPageParam + 1;
+      },
+      maxPages: 5,
+    });
   useEffect(() => {
     setCommitData(data?.pages[0].data);
     if (listInView) {
       if (page < 5 && !isFetchingNextPage) {
         setPage(page + 1);
         fetchNextPage();
-        // setCommitData((prevData) => [...prevData, ...data?.pages[page].data]);
-        // setCommitData(
-        //   data?.pages.map((item: unknown | any) => item.data).flat()
-        // );
       }
     }
   }, [listInView, data]);

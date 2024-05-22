@@ -20,9 +20,16 @@ const ChartFrame = styled.div`
   scrollbar-width: none;
 `;
 
-const YearSelectBox: React.FC = () => {
-  return <></>;
-};
+const ChartType = [
+  {
+    name: "calender",
+    code: 0,
+  },
+  {
+    name: "bar",
+    code: 1,
+  },
+];
 
 const ChartContents: React.FC<ChartContentType> = ({ id, repoName }) => {
   const [year, setYear] = useState<number>(2022);
@@ -52,12 +59,12 @@ const ChartContents: React.FC<ChartContentType> = ({ id, repoName }) => {
   const handleChangeSelectYears = (year: number) => {
     setYear(year);
   };
-  useLayoutEffect(() => {
+  useEffect(() => {
     for (let i = minYear; i <= maxYear; i++) {
       yearList.push({ i });
     }
     setCommitData(yearList);
-  }, []);
+  });
 
   useEffect(() => {
     fetchNextPage();
@@ -68,7 +75,11 @@ const ChartContents: React.FC<ChartContentType> = ({ id, repoName }) => {
         <ul className="year_list flex flex_jc_s flex_ai_c">
           {commitData.length !== 0 &&
             commitData?.map((item, index) => (
-              <li key={index} style={{ marginRight: "1rem" }}>
+              <li
+                key={index}
+                style={{ marginRight: "1rem" }}
+                className={item.i === year && "this"}
+              >
                 <button onClick={() => handleChangeSelectYears(item.i)}>
                   {item.i}
                 </button>
