@@ -1,11 +1,16 @@
 // MODULE
 import styled from "styled-components";
 // TYPE
-interface Props {}
+type SkeletonProps = {
+  type: string;
+  count: number;
+};
 // STYLED
-const KeyFrame = styled.div``;
-const Skeleton: React.FC<Props> = () => {
-  return <KeyFrame>loading</KeyFrame>;
+const SearchResultType = styled.div``;
+const Skeleton: React.FC<SkeletonProps> = ({ type, count }) => {
+  return (
+    <>{type === "search_result" ? <SearchResultType></SearchResultType> : ""}</>
+  );
 };
 
 export default Skeleton;

@@ -21,6 +21,8 @@ import RepositoryItem from "../../component/repositoryItem";
 import Meta from "../../component/meta/Meta";
 import MoveTop from "../../component/common/moveTop/MoveTop";
 import Skeleton from "../../component/common/skeleton";
+// STYLED
+import { Style } from "./style";
 // TYPE
 interface Props {
   public_repo_count: number | null;
@@ -40,8 +42,6 @@ interface Repo {
   bio: string;
   public_repos: number;
 }
-// STYLED
-import { Style } from "./style";
 
 const RepositoryList: React.FC<Props> = ({
   public_repo_count,
@@ -53,13 +53,13 @@ const RepositoryList: React.FC<Props> = ({
 
   const [keyword, setKeyword] = useState<string>("");
 
-  const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    setKeyword(e.target.value);
-  };
-  const handleClearKeyword = () => {
-    setKeyword("");
-  };
+  // const onChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   e.preventDefault();
+  //   setKeyword(e.target.value);
+  // };
+  // const handleClearKeyword = () => {
+  //   setKeyword("");
+  // };
 
   const handleCopyGeiCloneURL = (url: string, repoName: string) => {
     window.navigator.clipboard.writeText(url).then(() => {
@@ -69,7 +69,7 @@ const RepositoryList: React.FC<Props> = ({
 
   return (
     <>
-      <Meta id={loginId} />
+      <Meta id={loginId} title="" image="" description="" />
       <Style.RepoBox>
         <div className="flex flex_jc_sb flex_ai_c">
           <h5>
@@ -87,7 +87,7 @@ const RepositoryList: React.FC<Props> = ({
               </span>
             )}
           </h5>
-          <Style.KeywordBox>
+          {/* <Style.KeywordBox>
             <input
               type="text"
               id="filter_repo"
@@ -98,7 +98,7 @@ const RepositoryList: React.FC<Props> = ({
             {keyword !== "" && (
               <button onClick={() => handleClearKeyword()}>X</button>
             )}
-          </Style.KeywordBox>
+          </Style.KeywordBox> */}
         </div>
         <ul>
           {public_repo !== null ? (
@@ -144,16 +144,12 @@ const MemberDetail: React.FC<Props> = () => {
     commonStore();
 
   const [userData, setUserData] = useState<Repo | any>(null);
-  const [profileRepo, setProfileRepo] = useState<string>("");
-  const [publicRepo, setPublicRepo] = useState<unknown | object>(null);
-  const [page, setPage] = useState<number>(1);
+  const [profileRepo, setProfileRepo] = useState<string | any>("");
   const [tabActive, setTabActive] = useState<string>("repo");
   const [ref, inView] = useInView();
   const [listRef, listInView] = useInView();
 
-  const StorageData = localStorage.getItem("userData");
-  const MaxPage: number =
-    userData !== null ? Math.ceil(userData.public_repos / 30) : 0;
+  const StorageData: any = localStorage.getItem("userData");
 
   const handleTabMenuButton = (value: string) => {
     setTabActive(value);
@@ -169,7 +165,6 @@ const MemberDetail: React.FC<Props> = () => {
         const response: any | Repo = await memberInfoGET(state.id);
         setUserData(response?.data);
         localStorage.setItem("userData", JSON.stringify(response?.data));
-        getCurrentUserRepoList(response?.data.repos_url, page);
         const responseReadme: any | Repo = await memberRepoReadMeGET(
           state.id,
           state.id
@@ -191,53 +186,49 @@ const MemberDetail: React.FC<Props> = () => {
         "userData",
         JSON.stringify(getIndexedDB[0].memberResult)
       );
-      getCurrentUserRepoList(getIndexedDB[0]?.memberResult.repos_url, page);
       setProfileRepo(getIndexedDB[0].readmeData);
-    }
-  };
-  const getCurrentUserRepoList = async (url: string, page: number) => {
-    try {
-      const response: any | Repo = await memberRepositoryListGET(url, page);
-      setPublicRepo(response?.data);
-    } catch (error) {
-      console.log(error);
+      localStorage.setItem("userReadMe", getIndexedDB[0].readmeData);
     }
   };
 
-  useLayoutEffect(() => {
-    setDetailView("userInfo");
-    if (StorageData === null) {
-      getMemberInfo();
-    } else {
-      setUserData(JSON.parse(StorageData));
-      setProfileRepo(localStorage.getItem("userReadMe"));
-      getCurrentUserRepoList(JSON.parse(StorageData).repos_url, page);
-    }
-  }, []);
+  const { data, fetchNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["open-repository", userData?.repos_url],
+      queryFn: ({ pageParam }) =>
+        memberRepositoryListGET(userData?.repos_url, pageParam),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage: any | object[], allPages, lastPageParam) => {
+        if (lastPage.data.length === 0) {
+          return undefined;
+        }
+        return lastPageParam + 1;
+      },
+    });
 
   useEffect(() => {
-    const nextPage = page + 1;
-    const scrollRepoList = async (url: string, page: number) => {
-      try {
-        const response: Repo | any = await memberRepositoryListGET(url, page);
-        setPublicRepo((prevData: object[]) => [...prevData, ...response.data]);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    if (userData !== null && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, data]);
+  useEffect(() => {
     if (inView) {
       setHeaderFixed(false);
     } else {
       setHeaderFixed(true);
     }
-    if (listInView && page < MaxPage && StorageData !== null) {
-      setPage(page + 1);
-      scrollRepoList(JSON.parse(StorageData).repos_url, nextPage);
-    }
-  }, [inView, listInView]);
-  useEffect(() => {
+  }, [inView]);
+
+  useLayoutEffect(() => {
+    setDetailView("userInfo");
     getResultMemberDataToIndexedDB(state.id);
+    if (StorageData === null) {
+      getMemberInfo();
+    } else {
+      setUserData(JSON.parse(StorageData));
+      setProfileRepo(localStorage.getItem("userReadMe"));
+    }
   }, []);
+
   return (
     <>
       {headerFixed && <MoveTop />}
@@ -283,10 +274,12 @@ const MemberDetail: React.FC<Props> = () => {
           {tabActive === "repo" ? (
             <>
               <ScrollRestoration />
-              {publicRepo && userData && StorageData !== null && (
+              {userData !== null && !isFetching && (
                 <RepositoryList
                   public_repo_count={userData?.public_repos}
-                  public_repo={publicRepo}
+                  public_repo={data?.pages
+                    .map((item: unknown | any) => item.data)
+                    .flat()}
                   loginId={JSON.parse(StorageData).login}
                   listRef={listRef}
                 />

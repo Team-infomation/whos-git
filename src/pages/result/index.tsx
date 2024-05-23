@@ -9,6 +9,7 @@ import { memberSearchGET } from "../../api/github";
 import { searchStore } from "../../store/searchStore";
 // COMPONENT
 import ResultItem from "../../component/resultItem";
+import Skeleton from "../../component/common/skeleton";
 // TYPE
 type Props = {
   item: Repo;
@@ -76,7 +77,6 @@ const Result: React.FC<Props> = () => {
           keyword,
           nextPage
         );
-        console.log("response", response);
         setData((prevData) => [...prevData, ...response?.data.items]);
       } catch (error) {
         console.log(error);
@@ -100,7 +100,7 @@ const Result: React.FC<Props> = () => {
         </p>
         <br />총<span>{totalCount}개</span>의 결과
         <ul>
-          {data !== null &&
+          {data !== null ? (
             Array.isArray(data) &&
             data.map((item: Repo, index: number) => (
               <li key={index}>
@@ -112,7 +112,10 @@ const Result: React.FC<Props> = () => {
                   follower={item.followers_url}
                 />
               </li>
-            ))}
+            ))
+          ) : (
+            <Skeleton type={"search_result"} count={6} />
+          )}
           {data !== null && data.length > 29 && <li ref={listRef}></li>}
         </ul>
       </ResultSection>
